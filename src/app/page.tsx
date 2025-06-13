@@ -17,6 +17,82 @@ interface MenuItem {
   popular: boolean;
 }
 
+// Sample data for demo/fallback
+const sampleMenuItems: MenuItem[] = [
+  {
+    id: 1,
+    name: "Classic Margherita Pizza",
+    description: "Fresh mozzarella, tomato sauce, basil, olive oil",
+    price: 18.99,
+    category: "pizza",
+    image: "https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?w=400&h=300&fit=crop",
+    allergens: ["gluten", "dairy"],
+    isvegetarian: true,
+    preptime: "15-20 min",
+    popular: true
+  },
+  {
+    id: 2,
+    name: "Grilled Salmon",
+    description: "Atlantic salmon with lemon herb butter, served with seasonal vegetables",
+    price: 28.99,
+    category: "mains",
+    image: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400&h=300&fit=crop",
+    allergens: ["fish"],
+    isvegetarian: false,
+    preptime: "20-25 min",
+    popular: true
+  },
+  {
+    id: 3,
+    name: "Caesar Salad",
+    description: "Crisp romaine lettuce, parmesan cheese, croutons, caesar dressing",
+    price: 14.99,
+    category: "salads",
+    image: "https://images.unsplash.com/photo-1546793665-c74683f339c1?w=400&h=300&fit=crop",
+    allergens: ["gluten", "dairy", "eggs"],
+    isvegetarian: true,
+    preptime: "5-10 min",
+    popular: false
+  },
+  {
+    id: 4,
+    name: "BBQ Burger",
+    description: "Beef patty with BBQ sauce, onion rings, lettuce, tomato",
+    price: 16.99,
+    category: "burgers",
+    image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&h=300&fit=crop",
+    allergens: ["gluten", "dairy"],
+    isvegetarian: false,
+    preptime: "15-18 min",
+    popular: true
+  },
+  {
+    id: 5,
+    name: "Chocolate Cake",
+    description: "Rich chocolate cake with chocolate ganache and fresh berries",
+    price: 8.99,
+    category: "desserts",
+    image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=300&fit=crop",
+    allergens: ["gluten", "dairy", "eggs"],
+    isvegetarian: true,
+    preptime: "5 min",
+    popular: true
+  },
+  {
+    id: 6,
+    name: "Craft Beer",
+    description: "Local IPA with citrus notes and hoppy finish",
+    price: 6.99,
+    category: "beverages",
+    image: "https://images.unsplash.com/photo-1608270586620-248524c67de9?w=400&h=300&fit=crop",
+    allergens: ["gluten"],
+    isvegetarian: true,
+    preptime: "2 min",
+    popular: false
+  }
+];
+
 export default function DigitalMenu() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -39,82 +115,6 @@ export default function DigitalMenu() {
     { id: 'burgers', name: 'Burgers', icon: '🍔' },
     { id: 'desserts', name: 'Desserts', icon: '🍰' },
     { id: 'beverages', name: 'Beverages', icon: '🍺' }
-  ];
-
-  // Sample data for demo/fallback
-  const sampleMenuItems: MenuItem[] = [
-    {
-      id: 1,
-      name: "Classic Margherita Pizza",
-      description: "Fresh mozzarella, tomato sauce, basil, olive oil",
-      price: 18.99,
-      category: "pizza",
-      image: "https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?w=400&h=300&fit=crop",
-      allergens: ["gluten", "dairy"],
-      isvegetarian: true,
-      preptime: "15-20 min",
-      popular: true
-    },
-    {
-      id: 2,
-      name: "Grilled Salmon",
-      description: "Atlantic salmon with lemon herb butter, served with seasonal vegetables",
-      price: 28.99,
-      category: "mains",
-      image: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400&h=300&fit=crop",
-      allergens: ["fish"],
-      isvegetarian: false,
-      preptime: "20-25 min",
-      popular: true
-    },
-    {
-      id: 3,
-      name: "Caesar Salad",
-      description: "Crisp romaine lettuce, parmesan cheese, croutons, caesar dressing",
-      price: 14.99,
-      category: "salads",
-      image: "https://images.unsplash.com/photo-1546793665-c74683f339c1?w=400&h=300&fit=crop",
-      allergens: ["gluten", "dairy", "eggs"],
-      isvegetarian: true,
-      preptime: "5-10 min",
-      popular: false
-    },
-    {
-      id: 4,
-      name: "BBQ Burger",
-      description: "Beef patty with BBQ sauce, onion rings, lettuce, tomato",
-      price: 16.99,
-      category: "burgers",
-      image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&h=300&fit=crop",
-      allergens: ["gluten", "dairy"],
-      isvegetarian: false,
-      preptime: "15-18 min",
-      popular: true
-    },
-    {
-      id: 5,
-      name: "Chocolate Cake",
-      description: "Rich chocolate cake with chocolate ganache and fresh berries",
-      price: 8.99,
-      category: "desserts",
-      image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=300&fit=crop",
-      allergens: ["gluten", "dairy", "eggs"],
-      isvegetarian: true,
-      preptime: "5 min",
-      popular: true
-    },
-    {
-      id: 6,
-      name: "Craft Beer",
-      description: "Local IPA with citrus notes and hoppy finish",
-      price: 6.99,
-      category: "beverages",
-      image: "https://images.unsplash.com/photo-1608270586620-248524c67de9?w=400&h=300&fit=crop",
-      allergens: ["gluten"],
-      isvegetarian: true,
-      preptime: "2 min",
-      popular: false
-    }
   ];
 
   // Check online status
@@ -209,8 +209,8 @@ export default function DigitalMenu() {
     setError(null);
     
     try {
-      // Try to fetch from Google Sheets if URL is configured and online
-      if (GOOGLE_SHEETS_URL !== 'YOUR_SHEET_CSV_URL_HERE' && isOnline) {
+      // Try to fetch from Google Sheets if online
+      if (isOnline) {
         console.log('Fetching from Google Sheets...');
         const response = await fetch(GOOGLE_SHEETS_URL, {
           cache: 'no-cache',
@@ -234,8 +234,8 @@ export default function DigitalMenu() {
         setUsingFallback(false);
         console.log(`Loaded ${parsedItems.length} items from Google Sheets`);
       } else {
-        // Use sample data for demo or when offline
-        console.log('Using sample data...');
+        // Use sample data when offline
+        console.log('Using sample data (offline)...');
         await new Promise(resolve => setTimeout(resolve, 500)); // Simulate loading
         setMenuItems(sampleMenuItems);
         setUsingFallback(true);
@@ -244,7 +244,7 @@ export default function DigitalMenu() {
       setLastUpdated(new Date());
     } catch (err) {
       console.error('Error fetching menu:', err);
-      setError(err.message || 'Failed to load menu. Please try again.');
+      setError(err instanceof Error ? err.message : 'Failed to load menu. Please try again.');
       // Fallback to sample data on error
       if (menuItems.length === 0) {
         setMenuItems(sampleMenuItems);
@@ -253,19 +253,19 @@ export default function DigitalMenu() {
     } finally {
       setLoading(false);
     }
-  }, [GOOGLE_SHEETS_URL, isOnline, menuItems.length]);
+  }, [isOnline, menuItems.length]);
 
   useEffect(() => {
     fetchMenuData();
-    // Auto-refresh every 5 minutes if using Google Sheets
+    // Auto-refresh every 5 minutes if online
     const interval = setInterval(() => {
-      if (GOOGLE_SHEETS_URL !== 'YOUR_SHEET_CSV_URL_HERE' && isOnline) {
+      if (isOnline) {
         fetchMenuData(false); // Silent refresh
       }
     }, 5 * 60 * 1000);
     
     return () => clearInterval(interval);
-  }, [fetchMenuData, GOOGLE_SHEETS_URL, isOnline]);
+  }, [fetchMenuData, isOnline]);
 
   const filteredItems = menuItems.filter(item => {
     const matchesSearch = item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
