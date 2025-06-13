@@ -128,7 +128,7 @@ export default function DigitalMenu() {
       const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim().toLowerCase());
       
       const items = lines.slice(1).map((line, index) => {
-        const values = [];
+        const values: string[] = [];
         let current = '';
         let inQuotes = false;
         
