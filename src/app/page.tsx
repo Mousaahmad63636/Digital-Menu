@@ -4,14 +4,27 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { Search, Star, Clock, Leaf, AlertCircle, RefreshCw, Wifi, WifiOff } from 'lucide-react';
 
+interface MenuItem {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  image?: string;
+  allergens: string[];
+  isvegetarian: boolean;
+  preptime: string;
+  popular: boolean;
+}
+
 export default function DigitalMenu() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [favorites, setFavorites] = useState(new Set());
-  const [menuItems, setMenuItems] = useState([]);
+  const [favorites, setFavorites] = useState(new Set<number>());
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [lastUpdated, setLastUpdated] = useState(null);
+  const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [isOnline, setIsOnline] = useState(true);
   const [usingFallback, setUsingFallback] = useState(false);
 
@@ -29,7 +42,7 @@ export default function DigitalMenu() {
   ];
 
   // Sample data for demo/fallback
-  const sampleMenuItems = [
+  const sampleMenuItems: MenuItem[] = [
     {
       id: 1,
       name: "Classic Margherita Pizza",
@@ -146,27 +159,42 @@ export default function DigitalMenu() {
         }
         values.push(current.trim()); // Add the last value
         
-        const item = { id: index + 1 };
+        const item: Partial<MenuItem> = { id: index + 1 };
         
         headers.forEach((header, i) => {
           const value = (values[i] || '').replace(/"/g, '').trim();
           switch (header) {
+            case 'name':
+              item.name = value;
+              break;
+            case 'description':
+              item.description = value;
+              break;
             case 'price':
-              item[header] = parseFloat(value) || 0;
+              item.price = parseFloat(value) || 0;
+              break;
+            case 'category':
+              item.category = value;
+              break;
+            case 'image':
+              item.image = value;
               break;
             case 'allergens':
-              item[header] = value ? value.split(';').map(a => a.trim()).filter(a => a) : [];
+              item.allergens = value ? value.split(';').map(a => a.trim()).filter(a => a) : [];
               break;
             case 'isvegetarian':
-            case 'popular':
-              item[header] = value.toLowerCase() === 'yes' || value.toLowerCase() === 'true';
+              item.isvegetarian = value.toLowerCase() === 'yes' || value.toLowerCase() === 'true';
               break;
-            default:
-              item[header] = value;
+            case 'preptime':
+              item.preptime = value;
+              break;
+            case 'popular':
+              item.popular = value.toLowerCase() === 'yes' || value.toLowerCase() === 'true';
+              break;
           }
         });
         
-        return item;
+        return item as MenuItem;
       }).filter(item => item.name && item.name.length > 0);
       
       return items;
@@ -256,7 +284,7 @@ export default function DigitalMenu() {
     setFavorites(newFavorites);
   };
 
-  const AllergenBadge = ({ allergen }) => (
+  const AllergenBadge = ({ allergen }: { allergen: string }) => (
     <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-red-100 text-red-800 mr-1 mb-1">
       <AlertCircle className="w-3 h-3 mr-1" />
       {allergen}
