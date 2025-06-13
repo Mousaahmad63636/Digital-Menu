@@ -285,18 +285,19 @@ export default function DigitalMenu() {
   };
 
   const AllergenBadge = ({ allergen }: { allergen: string }) => (
-    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-red-100 text-red-800 mr-1 mb-1">
-      <AlertCircle className="w-3 h-3 mr-1" />
+    <span className="inline-flex items-center px-3 py-2 rounded-full text-sm bg-red-100 text-red-800 font-medium">
+      <AlertCircle className="w-4 h-4 mr-1" />
       {allergen}
     </span>
   );
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="text-center">
-          <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600" />
-          <p className="text-gray-600">Loading fresh menu...</p>
+          <RefreshCw className="w-12 h-12 animate-spin mx-auto mb-6 text-blue-600" />
+          <h2 className="text-2xl font-semibold text-gray-900 mb-2">Loading Menu</h2>
+          <p className="text-gray-600 text-lg">Getting fresh items for you...</p>
         </div>
       </div>
     );
@@ -304,14 +305,14 @@ export default function DigitalMenu() {
 
   if (error && menuItems.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="text-center">
-          <div className="text-red-500 text-6xl mb-4">⚠️</div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">Menu Unavailable</h3>
-          <p className="text-gray-600 mb-4">{error}</p>
+          <div className="text-red-500 text-8xl mb-6">⚠️</div>
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">Menu Unavailable</h3>
+          <p className="text-gray-600 mb-6 text-lg max-w-sm mx-auto leading-relaxed">{error}</p>
           <button 
             onClick={() => fetchMenuData()}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            className="bg-blue-600 text-white px-8 py-4 rounded-xl hover:bg-blue-700 transition-colors text-lg font-medium"
           >
             Try Again
           </button>
@@ -322,57 +323,57 @@ export default function DigitalMenu() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
+      {/* Mobile-First Header */}
       <div className="bg-white shadow-sm sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 py-6">
-          <div className="text-center mb-6">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Your Restaurant Name</h1>
-            <p className="text-gray-600">Fresh • Local • Delicious</p>
-            <div className="flex items-center justify-center gap-4 mt-2">
+        <div className="px-4 py-4">
+          <div className="text-center mb-4">
+            <h1 className="text-2xl font-bold text-gray-900 mb-1">Your Restaurant Name</h1>
+            <p className="text-gray-600 text-sm">Fresh • Local • Delicious</p>
+            <div className="flex items-center justify-center gap-3 mt-2 text-xs">
               {lastUpdated && (
-                <p className="text-xs text-gray-400">
-                  Last updated: {lastUpdated.toLocaleTimeString()}
+                <p className="text-gray-400">
+                  Updated: {lastUpdated.toLocaleTimeString()}
                 </p>
               )}
               <div className="flex items-center gap-1">
                 {isOnline ? (
-                  <Wifi className="w-4 h-4 text-green-500" />
+                  <Wifi className="w-3 h-3 text-green-500" />
                 ) : (
-                  <WifiOff className="w-4 h-4 text-red-500" />
+                  <WifiOff className="w-3 h-3 text-red-500" />
                 )}
-                <span className="text-xs text-gray-500">
+                <span className="text-gray-500">
                   {isOnline ? 'Online' : 'Offline'}
                 </span>
               </div>
               {usingFallback && (
-                <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
-                  Demo Mode
+                <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
+                  Demo
                 </span>
               )}
             </div>
           </div>
           
-          {/* Search Bar */}
+          {/* Mobile Search Bar */}
           <div className="relative mb-4">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
-              placeholder="Search menu items..."
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Search menu..."
+              className="w-full pl-12 pr-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
 
-          {/* Category Filter */}
-          <div className="flex overflow-x-auto pb-2 gap-2">
+          {/* Mobile Category Filter - Horizontal Scroll */}
+          <div className="flex overflow-x-auto pb-2 gap-2 scrollbar-hide">
             {categories.map(category => (
               <button
                 key={category.id}
                 onClick={() => setSelectedCategory(category.id)}
-                className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                className={`flex-shrink-0 px-4 py-3 rounded-full text-sm font-medium transition-colors min-w-max ${
                   selectedCategory === category.id
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-blue-600 text-white shadow-md'
                     : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
                 }`}
               >
@@ -384,80 +385,83 @@ export default function DigitalMenu() {
 
           {/* Error Message (non-blocking) */}
           {error && menuItems.length > 0 && (
-            <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
               <p className="text-sm text-yellow-800">
-                ⚠️ Using cached menu data. {error}
+                ⚠️ Using cached menu. {error}
               </p>
             </div>
           )}
 
-          {/* Refresh Button */}
-          <div className="flex justify-end mt-2">
+          {/* Mobile Refresh Button */}
+          <div className="flex justify-between items-center mt-3">
+            <p className="text-sm text-gray-500">
+              {filteredItems.length} items found
+            </p>
             <button
               onClick={() => fetchMenuData()}
               disabled={loading}
-              className="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-50"
+              className="text-gray-500 hover:text-gray-700 p-3 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-50"
               title="Refresh menu"
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
             </button>
           </div>
         </div>
       </div>
 
-      {/* Menu Items */}
-      <div className="max-w-4xl mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Mobile Menu Items - Single Column */}
+      <div className="px-4 py-4">
+        <div className="space-y-4">
           {filteredItems.map(item => (
-            <div key={item.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+            <div key={item.id} className="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
               <div className="relative">
                 <Image 
                   src={item.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop'} 
                   alt={item.name}
                   width={400}
-                  height={300}
-                  className="w-full h-48 object-cover"
+                  height={240}
+                  className="w-full h-60 object-cover"
                 />
                 {item.popular && (
-                  <div className="absolute top-2 left-2 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-semibold">
-                    Popular
+                  <div className="absolute top-3 left-3 bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                    🔥 Popular
                   </div>
                 )}
                 <button
                   onClick={() => toggleFavorite(item.id)}
-                  className={`absolute top-2 right-2 p-2 rounded-full ${
+                  className={`absolute top-3 right-3 p-3 rounded-full ${
                     favorites.has(item.id) ? 'bg-red-500 text-white' : 'bg-white text-gray-400'
-                  } hover:scale-110 transition-transform`}
+                  } hover:scale-110 transition-transform shadow-md`}
                 >
-                  <Star className="w-4 h-4" fill={favorites.has(item.id) ? 'currentColor' : 'none'} />
+                  <Star className="w-5 h-5" fill={favorites.has(item.id) ? 'currentColor' : 'none'} />
                 </button>
               </div>
               
-              <div className="p-4">
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-xl font-semibold text-gray-900">{item.name}</h3>
-                  <div className="text-xl font-bold text-blue-600">${item.price?.toFixed(2)}</div>
+              <div className="p-5">
+                <div className="flex justify-between items-start mb-3">
+                  <h3 className="text-xl font-bold text-gray-900 leading-tight">{item.name}</h3>
+                  <div className="text-2xl font-bold text-blue-600 ml-3">${item.price?.toFixed(2)}</div>
                 </div>
                 
-                <p className="text-gray-600 mb-3 text-sm leading-relaxed">{item.description}</p>
+                <p className="text-gray-600 mb-4 text-base leading-relaxed">{item.description}</p>
                 
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center text-sm text-gray-500">
-                    <Clock className="w-4 h-4 mr-1" />
-                    {item.preptime || 'Ask server'}
+                    <Clock className="w-4 h-4 mr-2" />
+                    <span className="font-medium">{item.preptime || 'Ask server'}</span>
                   </div>
                   {item.isvegetarian && (
-                    <div className="flex items-center text-sm text-green-600">
+                    <div className="flex items-center text-sm text-green-600 bg-green-50 px-3 py-1 rounded-full">
                       <Leaf className="w-4 h-4 mr-1" />
-                      Vegetarian
+                      <span className="font-medium">Vegetarian</span>
                     </div>
                   )}
                 </div>
                 
                 {item.allergens && item.allergens.length > 0 && (
-                  <div className="mb-3">
-                    <p className="text-xs text-gray-500 mb-1">Contains allergens:</p>
-                    <div className="flex flex-wrap">
+                  <div className="border-t pt-4">
+                    <p className="text-sm text-gray-500 mb-2 font-medium">Contains allergens:</p>
+                    <div className="flex flex-wrap gap-2">
                       {item.allergens.map(allergen => (
                         <AllergenBadge key={allergen} allergen={allergen} />
                       ))}
@@ -470,22 +474,24 @@ export default function DigitalMenu() {
         </div>
 
         {filteredItems.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-gray-400 text-6xl mb-4">🔍</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No items found</h3>
-            <p className="text-gray-600">Try adjusting your search or filter criteria</p>
+          <div className="text-center py-16">
+            <div className="text-gray-400 text-8xl mb-4">🔍</div>
+            <h3 className="text-2xl font-semibold text-gray-900 mb-3">No items found</h3>
+            <p className="text-gray-600 text-lg">Try adjusting your search or filter</p>
           </div>
         )}
       </div>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-8 mt-12">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h3 className="text-lg font-semibold mb-2">Your Restaurant Name</h3>
-          <p className="text-gray-400 mb-4">123 Main Street • (555) 123-4567</p>
-          <p className="text-sm text-gray-500">
-            Hours: Mon-Thu 11am-10pm • Fri-Sat 11am-11pm • Sun 12pm-9pm
-          </p>
+      {/* Mobile Footer */}
+      <footer className="bg-gray-900 text-white py-8 mt-8">
+        <div className="px-4 text-center">
+          <h3 className="text-xl font-semibold mb-3">Your Restaurant Name</h3>
+          <p className="text-gray-400 mb-4 text-lg">123 Main Street • (555) 123-4567</p>
+          <div className="text-sm text-gray-500 leading-relaxed">
+            <p className="mb-1">Mon-Thu: 11am-10pm</p>
+            <p className="mb-1">Fri-Sat: 11am-11pm</p>
+            <p>Sunday: 12pm-9pm</p>
+          </div>
         </div>
       </footer>
     </div>
