@@ -274,7 +274,7 @@ export default function DigitalMenu() {
     return matchesSearch && matchesCategory;
   });
 
-  const toggleFavorite = (itemId) => {
+  const toggleFavorite = (itemId: number) => {
     const newFavorites = new Set(favorites);
     if (newFavorites.has(itemId)) {
       newFavorites.delete(itemId);
