@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Search, Star, Clock, Leaf, AlertCircle, RefreshCw } from 'lucide-react';
+import { Search, Star, Clock, Leaf, AlertCircle, RefreshCw, Wifi, WifiOff } from 'lucide-react';
 
 export default function DigitalMenu() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -11,9 +11,11 @@ export default function DigitalMenu() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [isOnline, setIsOnline] = useState(true);
+  const [usingFallback, setUsingFallback] = useState(false);
 
-  // 🔧 REPLACE WITH YOUR GOOGLE SHEETS CSV EXPORT URL
-  const GOOGLE_SHEETS_URL = 'YOUR_SHEET_CSV_URL_HERE';
+  // 🔧 Your Google Sheets CSV Export URL
+  const GOOGLE_SHEETS_URL = 'https://docs.google.com/spreadsheets/d/1SJ0ooxxlc74FsvBlSoStuDus0nh4MEDeLpvtYQAf6Iw/export?format=csv';
 
   const categories = [
     { id: 'all', name: 'All Items', icon: '🍽️' },
@@ -25,7 +27,7 @@ export default function DigitalMenu() {
     { id: 'beverages', name: 'Beverages', icon: '🍺' }
   ];
 
-  // Sample data for demo
+  // Sample data for demo/fallback
   const sampleMenuItems = [
     {
       id: 1,
@@ -35,8 +37,8 @@ export default function DigitalMenu() {
       category: "pizza",
       image: "https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?w=400&h=300&fit=crop",
       allergens: ["gluten", "dairy"],
-      isVegetarian: true,
-      prepTime: "15-20 min",
+      isvegetarian: true,
+      preptime: "15-20 min",
       popular: true
     },
     {
@@ -47,8 +49,8 @@ export default function DigitalMenu() {
       category: "mains",
       image: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400&h=300&fit=crop",
       allergens: ["fish"],
-      isVegetarian: false,
-      prepTime: "20-25 min",
+      isvegetarian: false,
+      preptime: "20-25 min",
       popular: true
     },
     {
@@ -59,67 +61,166 @@ export default function DigitalMenu() {
       category: "salads",
       image: "https://images.unsplash.com/photo-1546793665-c74683f339c1?w=400&h=300&fit=crop",
       allergens: ["gluten", "dairy", "eggs"],
-      isVegetarian: true,
-      prepTime: "5-10 min",
+      isvegetarian: true,
+      preptime: "5-10 min",
+      popular: false
+    },
+    {
+      id: 4,
+      name: "BBQ Burger",
+      description: "Beef patty with BBQ sauce, onion rings, lettuce, tomato",
+      price: 16.99,
+      category: "burgers",
+      image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&h=300&fit=crop",
+      allergens: ["gluten", "dairy"],
+      isvegetarian: false,
+      preptime: "15-18 min",
+      popular: true
+    },
+    {
+      id: 5,
+      name: "Chocolate Cake",
+      description: "Rich chocolate cake with chocolate ganache and fresh berries",
+      price: 8.99,
+      category: "desserts",
+      image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=300&fit=crop",
+      allergens: ["gluten", "dairy", "eggs"],
+      isvegetarian: true,
+      preptime: "5 min",
+      popular: true
+    },
+    {
+      id: 6,
+      name: "Craft Beer",
+      description: "Local IPA with citrus notes and hoppy finish",
+      price: 6.99,
+      category: "beverages",
+      image: "https://images.unsplash.com/photo-1608270586620-248524c67de9?w=400&h=300&fit=crop",
+      allergens: ["gluten"],
+      isvegetarian: true,
+      preptime: "2 min",
       popular: false
     }
   ];
 
+  // Check online status
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    setIsOnline(navigator.onLine);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
   const parseCSVData = (csvText) => {
-    const lines = csvText.trim().split('\n');
-    const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim().toLowerCase());
-    
-    return lines.slice(1).map((line, index) => {
-      const values = line.split(',').map(v => v.replace(/"/g, '').trim());
-      const item = { id: index + 1 };
+    try {
+      const lines = csvText.trim().split('\n');
+      if (lines.length < 2) throw new Error('Invalid CSV format');
       
-      headers.forEach((header, i) => {
-        const value = values[i] || '';
-        switch (header) {
-          case 'price':
-            item[header] = parseFloat(value) || 0;
-            break;
-          case 'allergens':
-            item[header] = value ? value.split(';').map(a => a.trim()) : [];
-            break;
-          case 'isvegetarian':
-          case 'popular':
-            item[header] = value.toLowerCase() === 'yes' || value.toLowerCase() === 'true';
-            break;
-          default:
-            item[header] = value;
+      const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim().toLowerCase());
+      
+      const items = lines.slice(1).map((line, index) => {
+        const values = [];
+        let current = '';
+        let inQuotes = false;
+        
+        // Handle CSV parsing with proper quote handling
+        for (let i = 0; i < line.length; i++) {
+          const char = line[i];
+          if (char === '"') {
+            inQuotes = !inQuotes;
+          } else if (char === ',' && !inQuotes) {
+            values.push(current.trim());
+            current = '';
+          } else {
+            current += char;
+          }
         }
-      });
+        values.push(current.trim()); // Add the last value
+        
+        const item = { id: index + 1 };
+        
+        headers.forEach((header, i) => {
+          const value = (values[i] || '').replace(/"/g, '').trim();
+          switch (header) {
+            case 'price':
+              item[header] = parseFloat(value) || 0;
+              break;
+            case 'allergens':
+              item[header] = value ? value.split(';').map(a => a.trim()).filter(a => a) : [];
+              break;
+            case 'isvegetarian':
+            case 'popular':
+              item[header] = value.toLowerCase() === 'yes' || value.toLowerCase() === 'true';
+              break;
+            default:
+              item[header] = value;
+          }
+        });
+        
+        return item;
+      }).filter(item => item.name && item.name.length > 0);
       
-      return item;
-    }).filter(item => item.name);
+      return items;
+    } catch (error) {
+      console.error('CSV parsing error:', error);
+      throw new Error('Failed to parse menu data');
+    }
   };
 
-  const fetchMenuData = async () => {
-    setLoading(true);
+  const fetchMenuData = async (showLoading = true) => {
+    if (showLoading) setLoading(true);
+    setError(null);
+    
     try {
-      // Uncomment when you have your Google Sheets URL ready:
-      /*
-      if (GOOGLE_SHEETS_URL !== 'YOUR_SHEET_CSV_URL_HERE') {
-        const response = await fetch(GOOGLE_SHEETS_URL);
-        if (!response.ok) throw new Error('Failed to fetch menu data');
+      // Try to fetch from Google Sheets if URL is configured and online
+      if (GOOGLE_SHEETS_URL !== 'YOUR_SHEET_CSV_URL_HERE' && isOnline) {
+        console.log('Fetching from Google Sheets...');
+        const response = await fetch(GOOGLE_SHEETS_URL, {
+          cache: 'no-cache',
+          headers: {
+            'Cache-Control': 'no-cache'
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: Failed to fetch menu data`);
+        }
+        
         const csvData = await response.text();
         const parsedItems = parseCSVData(csvData);
+        
+        if (parsedItems.length === 0) {
+          throw new Error('No menu items found in spreadsheet');
+        }
+        
         setMenuItems(parsedItems);
+        setUsingFallback(false);
+        console.log(`Loaded ${parsedItems.length} items from Google Sheets`);
       } else {
-      */
-        // Using sample data for demo
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Use sample data for demo or when offline
+        console.log('Using sample data...');
+        await new Promise(resolve => setTimeout(resolve, 500)); // Simulate loading
         setMenuItems(sampleMenuItems);
-      /*
+        setUsingFallback(true);
       }
-      */
       
       setLastUpdated(new Date());
-      setError(null);
     } catch (err) {
-      setError('Failed to load menu. Please try again.');
       console.error('Error fetching menu:', err);
+      setError(err.message || 'Failed to load menu. Please try again.');
+      // Fallback to sample data on error
+      if (menuItems.length === 0) {
+        setMenuItems(sampleMenuItems);
+        setUsingFallback(true);
+      }
     } finally {
       setLoading(false);
     }
@@ -127,9 +228,15 @@ export default function DigitalMenu() {
 
   useEffect(() => {
     fetchMenuData();
-    const interval = setInterval(fetchMenuData, 5 * 60 * 1000);
+    // Auto-refresh every 5 minutes if using Google Sheets
+    const interval = setInterval(() => {
+      if (GOOGLE_SHEETS_URL !== 'YOUR_SHEET_CSV_URL_HERE' && isOnline) {
+        fetchMenuData(false); // Silent refresh
+      }
+    }, 5 * 60 * 1000);
+    
     return () => clearInterval(interval);
-  }, []);
+  }, [isOnline]);
 
   const filteredItems = menuItems.filter(item => {
     const matchesSearch = item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -166,7 +273,7 @@ export default function DigitalMenu() {
     );
   }
 
-  if (error) {
+  if (error && menuItems.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -174,7 +281,7 @@ export default function DigitalMenu() {
           <h3 className="text-xl font-semibold text-gray-900 mb-2">Menu Unavailable</h3>
           <p className="text-gray-600 mb-4">{error}</p>
           <button 
-            onClick={fetchMenuData}
+            onClick={() => fetchMenuData()}
             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
           >
             Try Again
@@ -192,11 +299,28 @@ export default function DigitalMenu() {
           <div className="text-center mb-6">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Your Restaurant Name</h1>
             <p className="text-gray-600">Fresh • Local • Delicious</p>
-            {lastUpdated && (
-              <p className="text-xs text-gray-400 mt-1">
-                Last updated: {lastUpdated.toLocaleTimeString()}
-              </p>
-            )}
+            <div className="flex items-center justify-center gap-4 mt-2">
+              {lastUpdated && (
+                <p className="text-xs text-gray-400">
+                  Last updated: {lastUpdated.toLocaleTimeString()}
+                </p>
+              )}
+              <div className="flex items-center gap-1">
+                {isOnline ? (
+                  <Wifi className="w-4 h-4 text-green-500" />
+                ) : (
+                  <WifiOff className="w-4 h-4 text-red-500" />
+                )}
+                <span className="text-xs text-gray-500">
+                  {isOnline ? 'Online' : 'Offline'}
+                </span>
+              </div>
+              {usingFallback && (
+                <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
+                  Demo Mode
+                </span>
+              )}
+            </div>
           </div>
           
           {/* Search Bar */}
@@ -229,14 +353,24 @@ export default function DigitalMenu() {
             ))}
           </div>
 
+          {/* Error Message (non-blocking) */}
+          {error && menuItems.length > 0 && (
+            <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <p className="text-sm text-yellow-800">
+                ⚠️ Using cached menu data. {error}
+              </p>
+            </div>
+          )}
+
           {/* Refresh Button */}
           <div className="flex justify-end mt-2">
             <button
-              onClick={fetchMenuData}
-              className="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors"
+              onClick={() => fetchMenuData()}
+              disabled={loading}
+              className="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-50"
               title="Refresh menu"
             >
-              <RefreshCw className="w-4 h-4" />
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             </button>
           </div>
         </div>
@@ -279,9 +413,9 @@ export default function DigitalMenu() {
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center text-sm text-gray-500">
                     <Clock className="w-4 h-4 mr-1" />
-                    {item.prepTime || 'Ask server'}
+                    {item.preptime || 'Ask server'}
                   </div>
-                  {item.isVegetarian && (
+                  {item.isvegetarian && (
                     <div className="flex items-center text-sm text-green-600">
                       <Leaf className="w-4 h-4 mr-1" />
                       Vegetarian
