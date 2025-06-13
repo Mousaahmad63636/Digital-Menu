@@ -323,89 +323,83 @@ export default function DigitalMenu() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Mobile-First Header */}
+      {/* Compact Mobile Header */}
       <div className="bg-white shadow-sm sticky top-0 z-10">
-        <div className="px-4 py-4">
-          <div className="text-center mb-4">
-            <h1 className="text-2xl font-bold text-gray-900 mb-1">Your Restaurant Name</h1>
-            <p className="text-gray-600 text-sm">Fresh • Local • Delicious</p>
-            <div className="flex items-center justify-center gap-3 mt-2 text-xs">
-              {lastUpdated && (
-                <p className="text-gray-400">
-                  Updated: {lastUpdated.toLocaleTimeString()}
-                </p>
-              )}
+        <div className="px-4 py-3">
+          <div className="text-center mb-3">
+            <h1 className="text-lg font-bold text-gray-900">Your Restaurant Name</h1>
+            <div className="flex items-center justify-center gap-4 mt-1 text-xs">
+              <span className="text-gray-600">Fresh • Local • Delicious</span>
               <div className="flex items-center gap-1">
                 {isOnline ? (
                   <Wifi className="w-3 h-3 text-green-500" />
                 ) : (
                   <WifiOff className="w-3 h-3 text-red-500" />
                 )}
-                <span className="text-gray-500">
-                  {isOnline ? 'Online' : 'Offline'}
-                </span>
+                <span className="text-gray-500">{isOnline ? 'Online' : 'Offline'}</span>
               </div>
               {usingFallback && (
-                <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
-                  Demo
-                </span>
+                <span className="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded text-xs">Demo</span>
               )}
             </div>
           </div>
           
-          {/* Mobile Search Bar */}
-          <div className="relative mb-4">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+          {/* Compact Search Bar */}
+          <div className="relative mb-3">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
               type="text"
               placeholder="Search menu..."
-              className="w-full pl-12 pr-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
 
-          {/* Mobile Category Filter - Horizontal Scroll */}
-          <div className="flex overflow-x-auto pb-2 gap-2 scrollbar-hide">
+          {/* Compact Category Filter */}
+          <div className="flex overflow-x-auto pb-1 gap-2 scrollbar-hide mb-2">
             {categories.map(category => (
               <button
                 key={category.id}
                 onClick={() => setSelectedCategory(category.id)}
-                className={`flex-shrink-0 px-4 py-3 rounded-full text-sm font-medium transition-colors min-w-max ${
+                className={`flex-shrink-0 px-3 py-2 rounded-full text-xs font-medium transition-colors min-w-max ${
                   selectedCategory === category.id
                     ? 'bg-blue-600 text-white shadow-md'
-                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                    : 'bg-white text-gray-700 border border-gray-300'
                 }`}
               >
-                <span className="mr-2">{category.icon}</span>
+                <span className="mr-1">{category.icon}</span>
                 {category.name}
               </button>
             ))}
           </div>
 
-          {/* Error Message (non-blocking) */}
-          {error && menuItems.length > 0 && (
-            <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <p className="text-sm text-yellow-800">
-                ⚠️ Using cached menu. {error}
-              </p>
+          {/* Compact Info Row */}
+          <div className="flex justify-between items-center text-xs">
+            <div className="flex items-center gap-3">
+              <span className="text-gray-500">{filteredItems.length} items</span>
+              {lastUpdated && (
+                <span className="text-gray-400">
+                  Updated {lastUpdated.toLocaleTimeString()}
+                </span>
+              )}
             </div>
-          )}
-
-          {/* Mobile Refresh Button */}
-          <div className="flex justify-between items-center mt-3">
-            <p className="text-sm text-gray-500">
-              {filteredItems.length} items found
-            </p>
             <button
               onClick={() => fetchMenuData()}
               disabled={loading}
-              className="text-gray-500 hover:text-gray-700 p-3 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-50"
+              className="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-50"
               title="Refresh menu"
             >
-              <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             </button>
           </div>
+
+          {/* Error Message (compact) */}
+          {error && menuItems.length > 0 && (
+            <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800">
+              ⚠️ Using cached menu. {error}
+            </div>
+          )}
         </div>
       </div>
 
