@@ -103,6 +103,7 @@ export default function DigitalMenu() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [isOnline, setIsOnline] = useState(true);
   const [usingFallback, setUsingFallback] = useState(false);
+  const [searchExpanded, setSearchExpanded] = useState(false);
 
   // 🔧 Your Google Sheets CSV Export URL
   const GOOGLE_SHEETS_URL = 'https://docs.google.com/spreadsheets/d/1SJ0ooxxlc74FsvBlSoStuDus0nh4MEDeLpvtYQAf6Iw/export?format=csv';
@@ -323,67 +324,19 @@ export default function DigitalMenu() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Compact Mobile Header */}
-      <div className="bg-white shadow-sm sticky top-0 z-10">
-        <div className="px-4 py-3">
-          <div className="text-center mb-3">
-            <h1 className="text-lg font-bold text-gray-900">Your Restaurant Name</h1>
-            <div className="flex items-center justify-center gap-4 mt-1 text-xs">
-              <span className="text-gray-600">Fresh • Local • Delicious</span>
-              <div className="flex items-center gap-1">
-                {isOnline ? (
-                  <Wifi className="w-3 h-3 text-green-500" />
-                ) : (
-                  <WifiOff className="w-3 h-3 text-red-500" />
-                )}
-                <span className="text-gray-500">{isOnline ? 'Online' : 'Offline'}</span>
-              </div>
-              {usingFallback && (
-                <span className="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded text-xs">Demo</span>
-              )}
-            </div>
-          </div>
-          
-          {/* Compact Search Bar */}
-          <div className="relative mb-3">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input
-              type="text"
-              placeholder="Search menu..."
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-
-          {/* Compact Category Filter */}
-          <div className="flex overflow-x-auto pb-1 gap-2 scrollbar-hide mb-2">
-            {categories.map(category => (
-              <button
-                key={category.id}
-                onClick={() => setSelectedCategory(category.id)}
-                className={`flex-shrink-0 px-3 py-2 rounded-full text-xs font-medium transition-colors min-w-max ${
-                  selectedCategory === category.id
-                    ? 'bg-blue-600 text-white shadow-md'
-                    : 'bg-white text-gray-700 border border-gray-300'
-                }`}
-              >
-                <span className="mr-1">{category.icon}</span>
-                {category.name}
-              </button>
-            ))}
-          </div>
-
-          {/* Compact Info Row */}
-          <div className="flex justify-between items-center text-xs">
-            <div className="flex items-center gap-3">
-              <span className="text-gray-500">{filteredItems.length} items</span>
-              {lastUpdated && (
-                <span className="text-gray-400">
-                  Updated {lastUpdated.toLocaleTimeString()}
-                </span>
-              )}
-            </div>
+      {/* Minimal Sticky Header */}
+      <div className="bg-white shadow-sm sticky top-0 z-20">
+        <div className="px-4 py-3 flex items-center justify-between">
+          <h1 className="text-lg font-bold text-gray-900">Your Restaurant Name</h1>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setSearchExpanded(!searchExpanded)}
+              className={`p-2 rounded-full transition-colors ${
+                searchExpanded ? 'bg-blue-600 text-white' : 'text-gray-500 hover:bg-gray-100'
+              }`}
+            >
+              <Search className="w-5 h-5" />
+            </button>
             <button
               onClick={() => fetchMenuData()}
               disabled={loading}
@@ -393,15 +346,55 @@ export default function DigitalMenu() {
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             </button>
           </div>
-
-          {/* Error Message (compact) */}
-          {error && menuItems.length > 0 && (
-            <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800">
-              ⚠️ Using cached menu. {error}
-            </div>
-          )}
         </div>
       </div>
+
+      {/* Expandable Search Bar */}
+      {searchExpanded && (
+        <div className="bg-white border-b sticky top-16 z-10 px-4 py-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Search menu items..."
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              autoFocus
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Category Filter */}
+      <div className="bg-white border-b px-4 py-3">
+        <div className="flex overflow-x-auto gap-2 scrollbar-hide">
+          {categories.map(category => (
+            <button
+              key={category.id}
+              onClick={() => {
+                setSelectedCategory(category.id);
+                setSearchExpanded(false); // Close search when selecting category
+              }}
+              className={`flex-shrink-0 px-3 py-2 rounded-full text-xs font-medium transition-colors min-w-max ${
+                selectedCategory === category.id
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <span className="mr-1">{category.icon}</span>
+              {category.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Error Message (compact) */}
+      {error && menuItems.length > 0 && (
+        <div className="mx-4 mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800">
+          ⚠️ Using cached menu. {error}
+        </div>
+      )}
 
       {/* Mobile Menu Items - Single Column */}
       <div className="px-4 py-4">
@@ -476,15 +469,44 @@ export default function DigitalMenu() {
         )}
       </div>
 
-      {/* Mobile Footer */}
-      <footer className="bg-gray-900 text-white py-8 mt-8">
-        <div className="px-4 text-center">
-          <h3 className="text-xl font-semibold mb-3">Your Restaurant Name</h3>
-          <p className="text-gray-400 mb-4 text-lg">123 Main Street • (555) 123-4567</p>
-          <div className="text-sm text-gray-500 leading-relaxed">
-            <p className="mb-1">Mon-Thu: 11am-10pm</p>
-            <p className="mb-1">Fri-Sat: 11am-11pm</p>
-            <p>Sunday: 12pm-9pm</p>
+      {/* Mobile Footer with Status Info */}
+      <footer className="bg-gray-900 text-white py-6 mt-8">
+        <div className="px-4">
+          {/* Status Bar */}
+          <div className="flex items-center justify-center gap-4 mb-4 text-sm border-b border-gray-700 pb-4">
+            <span className="text-gray-300">Fresh • Local • Delicious</span>
+            <div className="flex items-center gap-1">
+              {isOnline ? (
+                <Wifi className="w-4 h-4 text-green-400" />
+              ) : (
+                <WifiOff className="w-4 h-4 text-red-400" />
+              )}
+              <span className="text-gray-300">{isOnline ? 'Online' : 'Offline'}</span>
+            </div>
+            {usingFallback && (
+              <span className="bg-yellow-600 text-yellow-100 px-2 py-1 rounded text-xs">Demo Mode</span>
+            )}
+          </div>
+
+          {/* Menu Stats */}
+          <div className="text-center mb-4 text-sm text-gray-300">
+            <p>{filteredItems.length} menu items available</p>
+            {lastUpdated && (
+              <p className="text-gray-400 text-xs mt-1">
+                Last updated: {lastUpdated.toLocaleTimeString()}
+              </p>
+            )}
+          </div>
+
+          {/* Restaurant Info */}
+          <div className="text-center">
+            <h3 className="text-xl font-semibold mb-3">Your Restaurant Name</h3>
+            <p className="text-gray-400 mb-4 text-lg">123 Main Street • (555) 123-4567</p>
+            <div className="text-sm text-gray-500 leading-relaxed">
+              <p className="mb-1">Mon-Thu: 11am-10pm</p>
+              <p className="mb-1">Fri-Sat: 11am-11pm</p>
+              <p>Sunday: 12pm-9pm</p>
+            </div>
           </div>
         </div>
       </footer>
