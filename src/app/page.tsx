@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { Search, Star, Clock, Leaf, AlertCircle, RefreshCw, Wifi, WifiOff } from 'lucide-react';
 
 export default function DigitalMenu() {
@@ -119,7 +120,7 @@ export default function DigitalMenu() {
     };
   }, []);
 
-  const parseCSVData = (csvText) => {
+  const parseCSVData = (csvText: string) => {
     try {
       const lines = csvText.trim().split('\n');
       if (lines.length < 2) throw new Error('Invalid CSV format');
@@ -175,7 +176,7 @@ export default function DigitalMenu() {
     }
   };
 
-  const fetchMenuData = async (showLoading = true) => {
+  const fetchMenuData = useCallback(async (showLoading = true) => {
     if (showLoading) setLoading(true);
     setError(null);
     
@@ -224,7 +225,7 @@ export default function DigitalMenu() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [GOOGLE_SHEETS_URL, isOnline, menuItems.length]);
 
   useEffect(() => {
     fetchMenuData();
@@ -236,7 +237,7 @@ export default function DigitalMenu() {
     }, 5 * 60 * 1000);
     
     return () => clearInterval(interval);
-  }, [isOnline]);
+  }, [fetchMenuData, GOOGLE_SHEETS_URL, isOnline]);
 
   const filteredItems = menuItems.filter(item => {
     const matchesSearch = item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -382,9 +383,11 @@ export default function DigitalMenu() {
           {filteredItems.map(item => (
             <div key={item.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
               <div className="relative">
-                <img 
+                <Image 
                   src={item.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop'} 
                   alt={item.name}
+                  width={400}
+                  height={300}
                   className="w-full h-48 object-cover"
                 />
                 {item.popular && (
