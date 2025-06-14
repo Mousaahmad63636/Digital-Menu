@@ -101,35 +101,35 @@ export default function DigitalMenu() {
   const [notification, setNotification] = useState<string | null>(null);
 
   // Google Sheets CSV Export URL
-  const GOOGLE_SHEETS_URL = 'https://docs.google.com/spreadsheets/d/1SJ0ooxxlc74FsvBlSoStuDus0nh4MEDeLpvtYQAf6Iw/export?format=csv';
+  const GOOGLE_SHEETS_URL = "https://docs.google.com/spreadsheets/d/1SJ0ooxxlc74FsvBlSoStuDus0nh4MEDeLpvtYQAf6Iw/export?format=csv";
 
   const categories = [
-    { id: 'appetizers', name: '🥗 Appetizers' },
-    { id: 'mains', name: '🍽️ Main Courses' },
-    { id: 'desserts', name: '🧁 Desserts' },
-    { id: 'beverages', name: '🍹 Beverages' },
-    { id: 'specials', name: '⭐ Chef&apos;s Specials' }
+    { id: "appetizers", name: "🥗 Appetizers" },
+    { id: "mains", name: "🍽️ Main Courses" },
+    { id: "desserts", name: "🧁 Desserts" },
+    { id: "beverages", name: "🍹 Beverages" },
+    { id: "specials", name: "⭐ Chef&apos;s Specials" }
   ];
 
   const parseCSVData = (csvText: string) => {
     try {
-      const lines = csvText.trim().split('\n');
-      if (lines.length < 2) throw new Error('Invalid CSV format');
+      const lines = csvText.trim().split("\n");
+      if (lines.length < 2) throw new Error("Invalid CSV format");
       
-      const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim().toLowerCase());
+      const headers = lines[0].split(",").map(h => h.replace(/"/g, "").trim().toLowerCase());
       
       const items = lines.slice(1).map((line, index) => {
         const values: string[] = [];
-        let current = '';
+        let current = "";
         let inQuotes = false;
         
         for (let i = 0; i < line.length; i++) {
           const char = line[i];
-          if (char === '"') {
+          if (char === "\"") {
             inQuotes = !inQuotes;
-          } else if (char === ',' && !inQuotes) {
+          } else if (char === "," && !inQuotes) {
             values.push(current.trim());
-            current = '';
+            current = "";
           } else {
             current += char;
           }
@@ -139,34 +139,34 @@ export default function DigitalMenu() {
         const item: Partial<MenuItem> = { id: index + 1 };
         
         headers.forEach((header, i) => {
-          const value = (values[i] || '').replace(/"/g, '').trim();
+          const value = (values[i] || "").replace(/"/g, "").trim();
           switch (header) {
-            case 'name':
+            case "name":
               item.name = value;
               break;
-            case 'description':
+            case "description":
               item.description = value;
               break;
-            case 'price':
+            case "price":
               item.price = parseFloat(value) || 0;
               break;
-            case 'category':
+            case "category":
               item.category = value;
               break;
-            case 'image':
+            case "image":
               item.image = value;
               break;
-            case 'allergens':
-              item.allergens = value ? value.split(';').map(a => a.trim()).filter(a => a) : [];
+            case "allergens":
+              item.allergens = value ? value.split(";").map(a => a.trim()).filter(a => a) : [];
               break;
-            case 'isvegetarian':
-              item.isvegetarian = value.toLowerCase() === 'yes' || value.toLowerCase() === 'true';
+            case "isvegetarian":
+              item.isvegetarian = value.toLowerCase() === "yes" || value.toLowerCase() === "true";
               break;
-            case 'preptime':
+            case "preptime":
               item.preptime = value;
               break;
-            case 'popular':
-              item.popular = value.toLowerCase() === 'yes' || value.toLowerCase() === 'true';
+            case "popular":
+              item.popular = value.toLowerCase() === "yes" || value.toLowerCase() === "true";
               break;
           }
         });
@@ -176,8 +176,8 @@ export default function DigitalMenu() {
       
       return items;
     } catch (error) {
-      console.error('CSV parsing error:', error);
-      throw new Error('Failed to parse menu data');
+      console.error("CSV parsing error:", error);
+      throw new Error("Failed to parse menu data");
     }
   };
 
@@ -186,24 +186,24 @@ export default function DigitalMenu() {
     
     try {
       const response = await fetch(GOOGLE_SHEETS_URL, {
-        cache: 'no-cache',
-        headers: { 'Cache-Control': 'no-cache' }
+        cache: "no-cache",
+        headers: { "Cache-Control": "no-cache" }
       });
       
       if (!response.ok) {
-        throw new Error('Failed to fetch menu data');
+        throw new Error("Failed to fetch menu data");
       }
       
       const csvData = await response.text();
       const parsedItems = parseCSVData(csvData);
       
       if (parsedItems.length === 0) {
-        throw new Error('No menu items found');
+        throw new Error("No menu items found");
       }
       
       setMenuItems(parsedItems);
     } catch (err) {
-      console.error('Error fetching menu:', err);
+      console.error("Error fetching menu:", err);
       setMenuItems(sampleMenuItems);
     } finally {
       setLoading(false);
@@ -217,7 +217,7 @@ export default function DigitalMenu() {
   const filteredItems = menuItems.filter(item => {
     const matchesSearch = item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          item.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
+    const matchesCategory = selectedCategory === "all" || item.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -234,7 +234,7 @@ export default function DigitalMenu() {
     }
     
     const total = cart.reduce((sum, item) => sum + item.price, 0);
-    const cartSummary = `Your Order:\n\n${cart.map(item => `${item.name} - $${item.price.toFixed(2)}`).join('\n')}\n\nTotal: $${total.toFixed(2)}\n\nWould you like to proceed to checkout?`;
+    const cartSummary = `Your Order:\n\n${cart.map(item => `${item.name} - ${item.price.toFixed(2)}`).join('\n')}\n\nTotal: ${total.toFixed(2)}\n\nWould you like to proceed to checkout?`;
     
     if (confirm(cartSummary)) {
               alert('Thank you for your order! Our kitchen staff will prepare your meal shortly. 🍽️');
@@ -244,13 +244,13 @@ export default function DigitalMenu() {
 
   const getBadgeClass = (allergen: string) => {
     const badgeMap: { [key: string]: string } = {
-      'gluten': 'badge gluten-free',
-      'dairy': 'badge',
-      'nuts': 'badge',
-      'shellfish': 'badge spicy',
-      'fish': 'badge spicy'
+      "gluten": "badge gluten-free",
+      "dairy": "badge",
+      "nuts": "badge",
+      "shellfish": "badge spicy",
+      "fish": "badge spicy"
     };
-    return badgeMap[allergen] || 'badge';
+    return badgeMap[allergen] || "badge";
   };
 
   if (loading) {
