@@ -53,63 +53,48 @@ const sampleMenuItems: MenuItem[] = [
     isvegetarian: true,
     preptime: "20 min",
     popular: false
-  },
-  {
-    id: 4,
-    name: "Tropical Crème Brûlée",
-    description: "Classic vanilla crème brûlée infused with coconut and topped with caramelized sugar",
-    price: 12.99,
-    category: "desserts",
-    image: "https://images.unsplash.com/photo-1470324161839-ce2bb6fa6bc3?w=400&h=200&fit=crop",
-    allergens: ["dairy", "eggs"],
-    isvegetarian: true,
-    preptime: "10 min",
-    popular: true
-  },
-  {
-    id: 5,
-    name: "Sunset Paradise Cocktail",
-    description: "Premium rum, passion fruit, mango, and a splash of champagne",
-    price: 15.99,
-    category: "beverages",
-    image: "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=400&h=200&fit=crop",
-    allergens: [],
-    isvegetarian: true,
-    preptime: "5 min",
-    popular: true
-  },
-  {
-    id: 6,
-    name: "Chef&apos;s Tasting Menu",
-    description: "Seven-course journey through our finest seasonal ingredients",
-    price: 95.99,
-    category: "specials",
-    image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=200&fit=crop",
-    allergens: ["gluten", "dairy"],
-    isvegetarian: false,
-    preptime: "90 min",
-    popular: true
   }
 ];
 
 export default function DigitalMenu() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("appetizers");
+  const [selectedCategory, setSelectedCategory] = useState("");
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [categories, setCategories] = useState<{id: string, name: string}[]>([]);
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState<{name: string, price: number}[]>([]);
   const [notification, setNotification] = useState<string | null>(null);
 
   // Google Sheets CSV Export URL
-  const GOOGLE_SHEETS_URL = "https://docs.google.com/spreadsheets/d/1SJ0ooxxlc74FsvBlSoStuDus0nh4MEDeLpvtYQAf6Iw/export?format=csv";
+  const GOOGLE_SHEETS_URL = "https://docs.google.com/spreadsheets/d/1SJ0ooxxlc74FsvBlSoStuDus0nh4MEDeLpvtYQAf6Iw/export?format=csv&gid=0";
 
-  const categories = [
-    { id: "appetizers", name: "🥗 Appetizers" },
-    { id: "mains", name: "🍽️ Main Courses" },
-    { id: "desserts", name: "🧁 Desserts" },
-    { id: "beverages", name: "🍹 Beverages" },
-    { id: "specials", name: "⭐ Chef&apos;s Specials" }
-  ];
+  // Category emoji mapping
+  const categoryEmojis: { [key: string]: string } = {
+    "appetizers": "🥗",
+    "mains": "🍽️",
+    "main courses": "🍽️",
+    "desserts": "🧁",
+    "beverages": "🍹",
+    "drinks": "🍹",
+    "specials": "⭐",
+    "chef specials": "⭐",
+    "pizza": "🍕",
+    "pasta": "🍝",
+    "salads": "🥗",
+    "soups": "🍲",
+    "burgers": "🍔",
+    "sandwiches": "🥪",
+    "seafood": "🐟",
+    "meat": "🥩",
+    "chicken": "🍗",
+    "vegetarian": "🥬",
+    "vegan": "🌱"
+  };
+
+  const getEmojiForCategory = (category: string): string => {
+    const lowercaseCategory = category.toLowerCase();
+    return categoryEmojis[lowercaseCategory] || "🍽️";
+  };
 
   const parseCSVData = (csvText: string) => {
     try {
@@ -151,7 +136,7 @@ export default function DigitalMenu() {
               item.price = parseFloat(value) || 0;
               break;
             case "category":
-              item.category = value;
+              item.category = value.toLowerCase();
               break;
             case "image":
               item.image = value;
@@ -172,12 +157,27 @@ export default function DigitalMenu() {
         });
         
         return item as MenuItem;
-      }).filter(item => item.name && item.name.length > 0);
+      }).filter(item => item.name && item.name.length > 0 && item.category);
       
       return items;
     } catch (error) {
       console.error("CSV parsing error:", error);
       throw new Error("Failed to parse menu data");
+    }
+  };
+
+  const generateCategoriesFromItems = (items: MenuItem[]) => {
+    const uniqueCategories = [...new Set(items.map(item => item.category))];
+    const generatedCategories = uniqueCategories.map(categoryId => ({
+      id: categoryId,
+      name: `${getEmojiForCategory(categoryId)} ${categoryId.charAt(0).toUpperCase() + categoryId.slice(1)}`
+    }));
+    
+    setCategories(generatedCategories);
+    
+    // Set first category as default if no category is selected
+    if (generatedCategories.length > 0 && !selectedCategory) {
+      setSelectedCategory(generatedCategories[0].id);
     }
   };
 
@@ -202,13 +202,15 @@ export default function DigitalMenu() {
       }
       
       setMenuItems(parsedItems);
+      generateCategoriesFromItems(parsedItems);
     } catch (err) {
       console.error("Error fetching menu:", err);
       setMenuItems(sampleMenuItems);
+      generateCategoriesFromItems(sampleMenuItems);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [selectedCategory]);
 
   useEffect(() => {
     fetchMenuData();
@@ -217,7 +219,7 @@ export default function DigitalMenu() {
   const filteredItems = menuItems.filter(item => {
     const matchesSearch = item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          item.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || item.category === selectedCategory;
+    const matchesCategory = !selectedCategory || item.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -285,22 +287,24 @@ export default function DigitalMenu() {
         />
       </div>
 
-      <div className="categories">
-        {categories.map(category => (
-          <button
-            key={category.id}
-            className={`category-btn ${selectedCategory === category.id ? "active" : ""}`}
-            onClick={() => setSelectedCategory(category.id)}
-          >
-            {category.name}
-          </button>
-        ))}
-      </div>
+      {categories.length > 0 && (
+        <div className="categories">
+          {categories.map(category => (
+            <button
+              key={category.id}
+              className={`category-btn ${selectedCategory === category.id ? "active" : ""}`}
+              onClick={() => setSelectedCategory(category.id)}
+            >
+              {category.name}
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="menu-section">
         <div className="menu-category active">
           <h2 className="section-title">
-            {categories.find(c => c.id === selectedCategory)?.name}
+            {categories.find(c => c.id === selectedCategory)?.name || "Menu Items"}
           </h2>
           
           {filteredItems.map((item, index) => (
@@ -320,7 +324,7 @@ export default function DigitalMenu() {
                 <div className="item-description">{item.description}</div>
                 <div className="item-badges">
                   {item.isvegetarian && <span className="badge vegetarian">Vegetarian</span>}
-                  {item.popular && <span className="badge chef-special">Chef&apos;s Special</span>}
+                  {item.popular && <span className="badge chef-special">Popular</span>}
                   {item.allergens.map(allergen => (
                     <span key={allergen} className={getBadgeClass(allergen)}>
                       {allergen}
