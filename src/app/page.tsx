@@ -61,7 +61,7 @@ export default function DigitalMenu() {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [categories, setCategories] = useState<{id: string, name: string}[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [cart, setCart] = useState<{name: string, price: number}[]>([]);
   const [notification, setNotification] = useState<string | null>(null);
 
@@ -182,7 +182,8 @@ export default function DigitalMenu() {
   };
 
   const fetchMenuData = useCallback(async () => {
-    setLoading(true);
+    // Only show loading on initial load, not on category switches
+    setInitialLoading(true);
     
     try {
       const response = await fetch(GOOGLE_SHEETS_URL, {
@@ -208,7 +209,7 @@ export default function DigitalMenu() {
       setMenuItems(sampleMenuItems);
       generateCategoriesFromItems(sampleMenuItems);
     } finally {
-      setLoading(false);
+      setInitialLoading(false);
     }
   }, [selectedCategory]);
 
@@ -216,6 +217,7 @@ export default function DigitalMenu() {
     fetchMenuData();
   }, [fetchMenuData]);
 
+  // Instant filtering - no loading involved
   const filteredItems = menuItems.filter(item => {
     const matchesSearch = item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          item.description?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -255,7 +257,14 @@ export default function DigitalMenu() {
     return badgeMap[allergen] || "badge";
   };
 
-  if (loading) {
+  // Instant category switching
+  const handleCategoryChange = (categoryId: string) => {
+    setSelectedCategory(categoryId);
+    // No loading state - instant switch
+  };
+
+  // Only show loading screen on initial load
+  if (initialLoading) {
     return (
       <div className="loading-container">
         <div className="loading-content">
@@ -293,7 +302,7 @@ export default function DigitalMenu() {
             <button
               key={category.id}
               className={`category-btn ${selectedCategory === category.id ? "active" : ""}`}
-              onClick={() => setSelectedCategory(category.id)}
+              onClick={() => handleCategoryChange(category.id)}
             >
               {category.name}
             </button>
