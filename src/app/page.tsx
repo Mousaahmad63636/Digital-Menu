@@ -93,8 +93,8 @@ const sampleMenuItems: MenuItem[] = [
 ];
 
 export default function DigitalMenu() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('appetizers');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("appetizers");
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState<{name: string, price: number}[]>([]);
@@ -229,15 +229,15 @@ export default function DigitalMenu() {
 
   const viewCart = () => {
     if (cart.length === 0) {
-      alert('Your cart is empty. Add some delicious items!');
+      alert("Your cart is empty. Add some delicious items!");
       return;
     }
     
     const total = cart.reduce((sum, item) => sum + item.price, 0);
-    const cartSummary = `Your Order:\n\n${cart.map(item => `${item.name} - ${item.price.toFixed(2)}`).join('\n')}\n\nTotal: ${total.toFixed(2)}\n\nWould you like to proceed to checkout?`;
+    const cartSummary = `Your Order:\n\n${cart.map(item => `${item.name} - $${item.price.toFixed(2)}`).join("\n")}\n\nTotal: $${total.toFixed(2)}\n\nWould you like to proceed to checkout?`;
     
     if (confirm(cartSummary)) {
-              alert('Thank you for your order! Our kitchen staff will prepare your meal shortly. 🍽️');
+      alert("Thank you for your order! Our kitchen staff will prepare your meal shortly. 🍽️");
       setCart([]);
     }
   };
@@ -289,7 +289,7 @@ export default function DigitalMenu() {
         {categories.map(category => (
           <button
             key={category.id}
-            className={`category-btn ${selectedCategory === category.id ? 'active' : ''}`}
+            className={`category-btn ${selectedCategory === category.id ? "active" : ""}`}
             onClick={() => setSelectedCategory(category.id)}
           >
             {category.name}
@@ -306,7 +306,7 @@ export default function DigitalMenu() {
           {filteredItems.map((item, index) => (
             <div key={item.id} className="menu-item" style={{ animationDelay: `${index * 0.1}s` }}>
               <Image
-                src={item.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=200&fit=crop'}
+                src={item.image || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=200&fit=crop"}
                 alt={item.name}
                 width={400}
                 height={200}
@@ -320,7 +320,7 @@ export default function DigitalMenu() {
                 <div className="item-description">{item.description}</div>
                 <div className="item-badges">
                   {item.isvegetarian && <span className="badge vegetarian">Vegetarian</span>}
-                  {item.popular && <span className="badge chef-special">Chef's Special</span>}
+                  {item.popular && <span className="badge chef-special">Chef&apos;s Special</span>}
                   {item.allergens.map(allergen => (
                     <span key={allergen} className={getBadgeClass(allergen)}>
                       {allergen}

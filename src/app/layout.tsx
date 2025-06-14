@@ -88,21 +88,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Preconnect to optimize font loading */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        
-        {/* Favicon and app icons */}
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="icon" href="/icon.svg" type="image/svg+xml" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        
-        {/* PWA support */}
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        
-        {/* Optimize for mobile */}
         <meta name="HandheldFriendly" content="true" />
         <meta name="MobileOptimized" content="width" />
       </head>
