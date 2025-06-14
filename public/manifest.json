@@ -1,17 +1,17 @@
 {
-  "name": "Savora - Fine Dining Experience",
-  "short_name": "Savora Menu",
-  "description": "Discover our exquisite menu featuring fresh, locally sourced ingredients and culinary artistry",
+  "name": "Sunshine Resort - Digital Menu",
+  "short_name": "Sunshine Resort",
+  "description": "Culinary Excellence by the Sea - Browse our tropical-inspired menu",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#FF6B35",
+  "background_color": "#FFEAA7",
+  "theme_color": "#FF7675",
   "orientation": "portrait-primary",
-  "categories": ["food", "restaurant", "dining"],
+  "categories": ["food", "restaurant", "resort", "tropical"],
   "lang": "en",
   "dir": "ltr",
   "scope": "/",
-  "id": "savora-menu-app",
+  "id": "sunshine-resort-menu",
   
   "icons": [
     {
@@ -57,9 +57,9 @@
   
   "shortcuts": [
     {
-      "name": "View Menu",
+      "name": "Browse Menu",
       "short_name": "Menu",
-      "description": "Browse our full menu",
+      "description": "Browse our tropical menu",
       "url": "/",
       "icons": [
         {
@@ -72,7 +72,7 @@
     {
       "name": "Search Dishes",
       "short_name": "Search",
-      "description": "Find your favorite dishes",
+      "description": "Find your favorite tropical dishes",
       "url": "/?search=true",
       "icons": [
         {

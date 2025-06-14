@@ -9,23 +9,22 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Savora - Fine Dining Experience",
-  description: "Discover our exquisite menu featuring fresh, locally sourced ingredients and culinary artistry",
-  keywords: ["restaurant", "fine dining", "menu", "food", "cuisine", "mobile menu"],
-  authors: [{ name: "Savora Restaurant" }],
-  creator: "Savora Restaurant",
-  publisher: "Savora Restaurant",
+  title: "Sunshine Resort - Digital Menu",
+  description: "Culinary Excellence by the Sea - Browse our fresh menu items on your mobile device",
+  keywords: ["restaurant", "resort", "menu", "food", "tropical", "mobile menu", "dining"],
+  authors: [{ name: "Sunshine Resort" }],
+  creator: "Sunshine Resort",
+  publisher: "Sunshine Resort",
   
   // Mobile optimization
-  themeColor: "#FF6B35",
-  colorScheme: "dark",
+  themeColor: "#FF7675",
+  colorScheme: "light",
   
   // Apple Web App configuration
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent",
-    title: "Savora Menu",
-    startupImage: "/apple-touch-icon.png",
+    statusBarStyle: "default",
+    title: "Sunshine Resort Menu",
   },
   
   // Mobile app manifest
@@ -35,16 +34,16 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://savora-restaurant.com",
-    siteName: "Savora Restaurant",
-    title: "Savora - Fine Dining Experience",
-    description: "Discover our exquisite menu featuring fresh, locally sourced ingredients and culinary artistry",
+    url: "https://sunshine-resort.com",
+    siteName: "Sunshine Resort",
+    title: "Sunshine Resort - Digital Menu",
+    description: "Culinary Excellence by the Sea - Browse our fresh menu items",
     images: [
       {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "Savora Restaurant Menu",
+        alt: "Sunshine Resort Menu",
       },
     ],
   },
@@ -52,8 +51,8 @@ export const metadata: Metadata = {
   // Twitter Card
   twitter: {
     card: "summary_large_image",
-    title: "Savora - Fine Dining Experience",
-    description: "Discover our exquisite menu featuring fresh, locally sourced ingredients and culinary artistry",
+    title: "Sunshine Resort - Digital Menu",
+    description: "Culinary Excellence by the Sea - Browse our fresh menu items",
     images: ["/og-image.jpg"],
   },
   
@@ -78,11 +77,11 @@ export const metadata: Metadata = {
   other: {
     "mobile-web-app-capable": "yes",
     "apple-mobile-web-app-capable": "yes",
-    "apple-mobile-web-app-status-bar-style": "black-translucent",
-    "msapplication-TileColor": "#FF6B35",
-    "msapplication-navbutton-color": "#FF6B35",
-    "application-name": "Savora Menu",
-    "msapplication-tooltip": "Savora Restaurant Menu",
+    "apple-mobile-web-app-status-bar-style": "default",
+    "msapplication-TileColor": "#FF7675",
+    "msapplication-navbutton-color": "#FF7675",
+    "application-name": "Sunshine Resort Menu",
+    "msapplication-tooltip": "Sunshine Resort Digital Menu",
     "msapplication-starturl": "/",
     "msapplication-tap-highlight": "no",
   },
@@ -94,7 +93,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en">
       <head>
         {/* Preconnect to optimize font loading */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -105,26 +104,17 @@ export default function RootLayout({
         <link rel="icon" href="/icon.svg" type="image/svg+xml" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         
-        {/* Prevent zoom on input focus (iOS Safari) */}
-        <meta name="format-detection" content="telephone=no" />
-        
         {/* PWA support */}
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         
         {/* Optimize for mobile */}
         <meta name="HandheldFriendly" content="true" />
         <meta name="MobileOptimized" content="width" />
-        
-        {/* Prevent automatic phone number detection */}
-        <meta name="format-detection" content="telephone=no, date=no, address=no, email=no" />
       </head>
-      <body className="font-inter bg-black text-white antialiased overflow-x-hidden">
-        {/* Safe area handling for devices with notches */}
-        <div className="min-h-screen safe-area-top safe-area-bottom">
-          {children}
-        </div>
+      <body>
+        {children}
       </body>
     </html>
   );

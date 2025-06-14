@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
-import { Search, Heart, Clock, Leaf, X, Filter, ChevronRight } from 'lucide-react';
 
 interface MenuItem {
   id: number;
@@ -21,98 +20,95 @@ interface MenuItem {
 const sampleMenuItems: MenuItem[] = [
   {
     id: 1,
-    name: "Classic Margherita Pizza",
-    description: "Fresh mozzarella, tomato sauce, basil, olive oil",
+    name: "Sunset Ceviche",
+    description: "Fresh catch of the day marinated in citrus, red onion, cilantro, and tropical fruits",
     price: 18.99,
-    category: "pizza",
-    image: "https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?w=400&h=300&fit=crop",
-    allergens: ["gluten", "dairy"],
-    isvegetarian: true,
-    preptime: "15-20 min",
+    category: "appetizers",
+    image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=200&fit=crop",
+    allergens: ["fish"],
+    isvegetarian: false,
+    preptime: "15 min",
     popular: true
   },
   {
     id: 2,
-    name: "Grilled Salmon",
-    description: "Atlantic salmon with lemon herb butter, served with seasonal vegetables",
-    price: 28.99,
+    name: "Grilled Mahi-Mahi",
+    description: "Fresh mahi-mahi with coconut rice, grilled vegetables, and passion fruit glaze",
+    price: 32.99,
     category: "mains",
-    image: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400&h=300&fit=crop",
-    allergens: ["fish"],
+    image: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400&h=200&fit=crop",
+    allergens: [],
     isvegetarian: false,
-    preptime: "20-25 min",
+    preptime: "25 min",
     popular: true
   },
   {
     id: 3,
-    name: "Caesar Salad",
-    description: "Crisp romaine lettuce, parmesan cheese, croutons, caesar dressing",
-    price: 14.99,
-    category: "salads",
-    image: "https://images.unsplash.com/photo-1546793665-c74683f339c1?w=400&h=300&fit=crop",
-    allergens: ["gluten", "dairy", "eggs"],
+    name: "Mediterranean Quinoa Bowl",
+    description: "Quinoa with roasted vegetables, feta cheese, olives, and tahini dressing",
+    price: 24.99,
+    category: "mains",
+    image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=200&fit=crop",
+    allergens: ["dairy"],
     isvegetarian: true,
-    preptime: "5-10 min",
+    preptime: "20 min",
     popular: false
   },
   {
     id: 4,
-    name: "BBQ Burger",
-    description: "Beef patty with BBQ sauce, onion rings, lettuce, tomato",
-    price: 16.99,
-    category: "burgers",
-    image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&h=300&fit=crop",
-    allergens: ["gluten", "dairy"],
-    isvegetarian: false,
-    preptime: "15-18 min",
+    name: "Tropical Crème Brûlée",
+    description: "Classic vanilla crème brûlée infused with coconut and topped with caramelized sugar",
+    price: 12.99,
+    category: "desserts",
+    image: "https://images.unsplash.com/photo-1470324161839-ce2bb6fa6bc3?w=400&h=200&fit=crop",
+    allergens: ["dairy", "eggs"],
+    isvegetarian: true,
+    preptime: "10 min",
     popular: true
   },
   {
     id: 5,
-    name: "Chocolate Cake",
-    description: "Rich chocolate cake with chocolate ganache and fresh berries",
-    price: 8.99,
-    category: "desserts",
-    image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=300&fit=crop",
-    allergens: ["gluten", "dairy", "eggs"],
+    name: "Sunset Paradise Cocktail",
+    description: "Premium rum, passion fruit, mango, and a splash of champagne",
+    price: 15.99,
+    category: "beverages",
+    image: "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=400&h=200&fit=crop",
+    allergens: [],
     isvegetarian: true,
     preptime: "5 min",
     popular: true
   },
   {
     id: 6,
-    name: "Craft Beer",
-    description: "Local IPA with citrus notes and hoppy finish",
-    price: 6.99,
-    category: "beverages",
-    image: "https://images.unsplash.com/photo-1608270586620-248524c67de9?w=400&h=300&fit=crop",
-    allergens: ["gluten"],
-    isvegetarian: true,
-    preptime: "2 min",
-    popular: false
+    name: "Chef's Tasting Menu",
+    description: "Seven-course journey through our finest seasonal ingredients",
+    price: 95.99,
+    category: "specials",
+    image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=200&fit=crop",
+    allergens: ["gluten", "dairy"],
+    isvegetarian: false,
+    preptime: "90 min",
+    popular: true
   }
 ];
 
 export default function DigitalMenu() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [favorites, setFavorites] = useState(new Set<number>());
+  const [selectedCategory, setSelectedCategory] = useState('appetizers');
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showSearch, setShowSearch] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
+  const [cart, setCart] = useState<{name: string, price: number}[]>([]);
+  const [notification, setNotification] = useState<string | null>(null);
 
   // Google Sheets CSV Export URL
   const GOOGLE_SHEETS_URL = 'https://docs.google.com/spreadsheets/d/1SJ0ooxxlc74FsvBlSoStuDus0nh4MEDeLpvtYQAf6Iw/export?format=csv';
 
   const categories = [
-    { id: 'all', name: 'All', emoji: '🍽️' },
-    { id: 'pizza', name: 'Pizza', emoji: '🍕' },
-    { id: 'mains', name: 'Mains', emoji: '🥘' },
-    { id: 'salads', name: 'Salads', emoji: '🥗' },
-    { id: 'burgers', name: 'Burgers', emoji: '🍔' },
-    { id: 'desserts', name: 'Desserts', emoji: '🍰' },
-    { id: 'beverages', name: 'Drinks', emoji: '🥤' }
+    { id: 'appetizers', name: '🥗 Appetizers' },
+    { id: 'mains', name: '🍽️ Main Courses' },
+    { id: 'desserts', name: '🧁 Desserts' },
+    { id: 'beverages', name: '🍹 Beverages' },
+    { id: 'specials', name: '⭐ Chef\'s Specials' }
   ];
 
   const parseCSVData = (csvText: string) => {
@@ -225,240 +221,156 @@ export default function DigitalMenu() {
     return matchesSearch && matchesCategory;
   });
 
-  const toggleFavorite = (itemId: number) => {
-    const newFavorites = new Set(favorites);
-    if (newFavorites.has(itemId)) {
-      newFavorites.delete(itemId);
-    } else {
-      newFavorites.add(itemId);
+  const addToCart = (itemName: string, price: number) => {
+    setCart(prev => [...prev, { name: itemName, price }]);
+    setNotification(`${itemName} added to cart!`);
+    setTimeout(() => setNotification(null), 3000);
+  };
+
+  const viewCart = () => {
+    if (cart.length === 0) {
+      alert('Your cart is empty. Add some delicious items!');
+      return;
     }
-    setFavorites(newFavorites);
+    
+    const total = cart.reduce((sum, item) => sum + item.price, 0);
+    const cartSummary = `Your Order:\n\n${cart.map(item => `${item.name} - $${item.price.toFixed(2)}`).join('\n')}\n\nTotal: $${total.toFixed(2)}\n\nWould you like to proceed to checkout?`;
+    
+    if (confirm(cartSummary)) {
+      alert('Thank you for your order! Our kitchen staff will prepare your meal shortly. 🍽️');
+      setCart([]);
+    }
+  };
+
+  const getBadgeClass = (allergen: string) => {
+    const badgeMap: { [key: string]: string } = {
+      'gluten': 'badge gluten-free',
+      'dairy': 'badge',
+      'nuts': 'badge',
+      'shellfish': 'badge spicy',
+      'fish': 'badge spicy'
+    };
+    return badgeMap[allergen] || 'badge';
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-white text-xl font-light">Loading Menu...</p>
+      <div className="loading-container">
+        <div className="loading-content">
+          <div className="loading-spinner"></div>
+          <p>Loading our delicious menu...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-black/90 backdrop-blur-md border-b border-gray-800">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold">Savora</h1>
-              <p className="text-gray-400 text-sm">Fine Dining Experience</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setShowSearch(!showSearch)}
-                className="p-3 rounded-full bg-gray-900/50 hover:bg-gray-800 transition-colors"
-              >
-                <Search className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className="p-3 rounded-full bg-gray-900/50 hover:bg-gray-800 transition-colors"
-              >
-                <Filter className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-        </div>
+    <div className="container">
+      <header className="header">
+        <div className="logo">🌅 Sunshine Resort</div>
+        <div className="tagline">Culinary Excellence by the Sea</div>
       </header>
 
-      {/* Search Overlay */}
-      {showSearch && (
-        <div className="fixed inset-0 z-50 bg-black">
-          <div className="p-6">
-            <div className="flex items-center gap-4 mb-6">
-              <button
-                onClick={() => setShowSearch(false)}
-                className="p-2 rounded-full hover:bg-gray-900"
-              >
-                <X className="w-6 h-6" />
-              </button>
-              <input
-                type="text"
-                placeholder="Search dishes..."
-                className="flex-1 bg-transparent border-b border-gray-700 pb-3 text-xl placeholder-gray-500 focus:outline-none focus:border-orange-500"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                autoFocus
-              />
-            </div>
-            {searchTerm && (
-              <div className="space-y-4">
-                {filteredItems.slice(0, 5).map(item => (
-                  <div key={item.id} className="flex items-center gap-4 p-4 rounded-xl bg-gray-900/30">
-                    <Image
-                      src={item.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop'}
-                      alt={item.name}
-                      width={60}
-                      height={60}
-                      className="rounded-lg object-cover"
-                    />
-                    <div className="flex-1">
-                      <h3 className="font-medium">{item.name}</h3>
-                      <p className="text-orange-500 font-semibold">${item.price.toFixed(2)}</p>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-gray-500" />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Filters Overlay */}
-      {showFilters && (
-        <div className="fixed inset-0 z-40 bg-black/80 backdrop-blur-sm">
-          <div className="absolute bottom-0 left-0 right-0 bg-gray-900 rounded-t-3xl p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold">Categories</h3>
-              <button
-                onClick={() => setShowFilters(false)}
-                className="p-2 rounded-full hover:bg-gray-800"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              {categories.map(category => (
-                <button
-                  key={category.id}
-                  onClick={() => {
-                    setSelectedCategory(category.id);
-                    setShowFilters(false);
-                  }}
-                  className={`p-4 rounded-xl text-left transition-colors ${
-                    selectedCategory === category.id
-                      ? 'bg-orange-500 text-black'
-                      : 'bg-gray-800 hover:bg-gray-700'
-                  }`}
-                >
-                  <div className="text-2xl mb-1">{category.emoji}</div>
-                  <div className="font-medium">{category.name}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Current Category */}
-      <div className="px-6 py-4 border-b border-gray-800">
-        <div className="flex items-center gap-3">
-          <span className="text-2xl">
-            {categories.find(c => c.id === selectedCategory)?.emoji}
-          </span>
-          <div>
-            <h2 className="text-xl font-bold">
-              {categories.find(c => c.id === selectedCategory)?.name}
-            </h2>
-            <p className="text-gray-400 text-sm">{filteredItems.length} items</p>
-          </div>
-        </div>
+      <div className="time-indicator">
+        ⏰ Kitchen Hours: 6:00 AM - 11:00 PM | Room Service Available 24/7
       </div>
 
-      {/* Menu Items */}
-      <div className="px-6 py-6 pb-20">
-        <div className="space-y-6">
-          {filteredItems.map(item => (
-            <div key={item.id} className="group">
-              <div className="relative overflow-hidden rounded-2xl bg-gray-900/30 backdrop-blur-sm">
-                <div className="relative h-48">
-                  <Image
-                    src={item.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop'}
-                    alt={item.name}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                  
-                  {/* Popular Badge */}
-                  {item.popular && (
-                    <div className="absolute top-4 left-4 bg-orange-500 text-black px-3 py-1 rounded-full text-sm font-bold">
-                      Popular
-                    </div>
-                  )}
-                  
-                  {/* Favorite Button */}
-                  <button
-                    onClick={() => toggleFavorite(item.id)}
-                    className="absolute top-4 right-4 p-3 rounded-full bg-black/30 backdrop-blur-sm hover:scale-110 transition-transform"
-                  >
-                    <Heart
-                      className={`w-5 h-5 ${
-                        favorites.has(item.id) ? 'fill-red-500 text-red-500' : 'text-white'
-                      }`}
-                    />
-                  </button>
-                  
-                  {/* Price */}
-                  <div className="absolute bottom-4 right-4 bg-orange-500 text-black px-4 py-2 rounded-full">
-                    <span className="font-bold text-lg">${item.price.toFixed(2)}</span>
-                  </div>
+      <div className="search-bar">
+        <input
+          type="text"
+          className="search-input"
+          placeholder="Search our menu..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
+
+      <div className="categories">
+        {categories.map(category => (
+          <button
+            key={category.id}
+            className={`category-btn ${selectedCategory === category.id ? 'active' : ''}`}
+            onClick={() => setSelectedCategory(category.id)}
+          >
+            {category.name}
+          </button>
+        ))}
+      </div>
+
+      <div className="menu-section">
+        <div className="menu-category active">
+          <h2 className="section-title">
+            {categories.find(c => c.id === selectedCategory)?.name}
+          </h2>
+          
+          {filteredItems.map((item, index) => (
+            <div key={item.id} className="menu-item" style={{ animationDelay: `${index * 0.1}s` }}>
+              <Image
+                src={item.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=200&fit=crop'}
+                alt={item.name}
+                width={400}
+                height={200}
+                className="item-image"
+              />
+              <div className="item-content">
+                <div className="item-header">
+                  <div className="item-name">{item.name}</div>
+                  <div className="item-price">${item.price.toFixed(2)}</div>
                 </div>
-                
-                <div className="p-6">
-                  <div className="flex items-start justify-between mb-3">
-                    <h3 className="text-xl font-bold leading-tight flex-1">{item.name}</h3>
-                  </div>
-                  
-                  <p className="text-gray-300 mb-4 leading-relaxed">{item.description}</p>
-                  
-                  <div className="flex items-center gap-4 text-sm text-gray-400">
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-4 h-4" />
-                      <span>{item.preptime}</span>
-                    </div>
-                    
-                    {item.isvegetarian && (
-                      <div className="flex items-center gap-1 text-green-400">
-                        <Leaf className="w-4 h-4" />
-                        <span>Vegetarian</span>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {item.allergens && item.allergens.length > 0 && (
-                    <div className="mt-4 pt-4 border-t border-gray-800">
-                      <p className="text-xs text-gray-500 mb-2">Contains:</p>
-                      <div className="flex flex-wrap gap-2">
-                        {item.allergens.map(allergen => (
-                          <span
-                            key={allergen}
-                            className="text-xs bg-red-900/30 text-red-300 px-2 py-1 rounded-full"
-                          >
-                            {allergen}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                <div className="item-description">{item.description}</div>
+                <div className="item-badges">
+                  {item.isvegetarian && <span className="badge vegetarian">Vegetarian</span>}
+                  {item.popular && <span className="badge chef-special">Chef's Special</span>}
+                  {item.allergens.map(allergen => (
+                    <span key={allergen} className={getBadgeClass(allergen)}>
+                      {allergen}
+                    </span>
+                  ))}
                 </div>
+                <button 
+                  className="add-to-cart"
+                  onClick={() => addToCart(item.name, item.price)}
+                >
+                  Add to Order
+                </button>
               </div>
             </div>
           ))}
-        </div>
 
-        {filteredItems.length === 0 && (
-          <div className="text-center py-20">
-            <div className="text-6xl mb-4">🍽️</div>
-            <h3 className="text-xl font-bold mb-2">No dishes found</h3>
-            <p className="text-gray-400">Try a different search or category</p>
-          </div>
-        )}
+          {filteredItems.length === 0 && (
+            <div className="no-items">
+              <div className="no-items-emoji">🔍</div>
+              <h3>No dishes found</h3>
+              <p>Try adjusting your search or browse other categories</p>
+            </div>
+          )}
+        </div>
       </div>
+
+      <footer className="footer">
+        <div className="footer-content">
+          <div className="contact-info">
+            📍 123 Paradise Beach Drive, Tropical Island<br />
+            📞 +1 (555) SUNSHINE | 🌐 sunshineresort.com
+          </div>
+          <div className="social-links">
+            <a href="#" className="social-link">📘</a>
+            <a href="#" className="social-link">📷</a>
+            <a href="#" className="social-link">🐦</a>
+          </div>
+        </div>
+      </footer>
+
+      <div className="floating-cart" onClick={viewCart}>
+        <div className="cart-icon">🛒</div>
+        <div className="cart-count">{cart.length}</div>
+      </div>
+
+      {notification && (
+        <div className="notification">
+          {notification}
+        </div>
+      )}
     </div>
   );
 }
