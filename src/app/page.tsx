@@ -80,7 +80,7 @@ const sampleMenuItems: MenuItem[] = [
   },
   {
     id: 6,
-    name: "Chef's Tasting Menu",
+    name: "Chef&apos;s Tasting Menu",
     description: "Seven-course journey through our finest seasonal ingredients",
     price: 95.99,
     category: "specials",
@@ -108,7 +108,7 @@ export default function DigitalMenu() {
     { id: 'mains', name: '🍽️ Main Courses' },
     { id: 'desserts', name: '🧁 Desserts' },
     { id: 'beverages', name: '🍹 Beverages' },
-    { id: 'specials', name: '⭐ Chef\'s Specials' }
+    { id: 'specials', name: '⭐ Chef&apos;s Specials' }
   ];
 
   const parseCSVData = (csvText: string) => {
@@ -237,7 +237,7 @@ export default function DigitalMenu() {
     const cartSummary = `Your Order:\n\n${cart.map(item => `${item.name} - $${item.price.toFixed(2)}`).join('\n')}\n\nTotal: $${total.toFixed(2)}\n\nWould you like to proceed to checkout?`;
     
     if (confirm(cartSummary)) {
-      alert('Thank you for your order! Our kitchen staff will prepare your meal shortly. 🍽️');
+              alert('Thank you for your order! Our kitchen staff will prepare your meal shortly. 🍽️');
       setCart([]);
     }
   };
