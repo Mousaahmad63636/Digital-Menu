@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
-import { Search, Star, Clock, Leaf, AlertCircle, RefreshCw, Wifi, WifiOff } from 'lucide-react';
+import { Search, Heart, Clock, Leaf, X, Filter, ChevronRight } from 'lucide-react';
 
 interface MenuItem {
   id: number;
@@ -99,40 +99,21 @@ export default function DigitalMenu() {
   const [favorites, setFavorites] = useState(new Set<number>());
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const [isOnline, setIsOnline] = useState(true);
-  const [usingFallback, setUsingFallback] = useState(false);
-  const [searchExpanded, setSearchExpanded] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
 
-  // 🔧 Your Google Sheets CSV Export URL
+  // Google Sheets CSV Export URL
   const GOOGLE_SHEETS_URL = 'https://docs.google.com/spreadsheets/d/1SJ0ooxxlc74FsvBlSoStuDus0nh4MEDeLpvtYQAf6Iw/export?format=csv';
 
   const categories = [
-    { id: 'all', name: 'All Items', icon: '🍽️' },
-    { id: 'pizza', name: 'Pizza', icon: '🍕' },
-    { id: 'mains', name: 'Main Dishes', icon: '🥘' },
-    { id: 'salads', name: 'Salads', icon: '🥗' },
-    { id: 'burgers', name: 'Burgers', icon: '🍔' },
-    { id: 'desserts', name: 'Desserts', icon: '🍰' },
-    { id: 'beverages', name: 'Beverages', icon: '🍺' }
+    { id: 'all', name: 'All', emoji: '🍽️' },
+    { id: 'pizza', name: 'Pizza', emoji: '🍕' },
+    { id: 'mains', name: 'Mains', emoji: '🥘' },
+    { id: 'salads', name: 'Salads', emoji: '🥗' },
+    { id: 'burgers', name: 'Burgers', emoji: '🍔' },
+    { id: 'desserts', name: 'Desserts', emoji: '🍰' },
+    { id: 'beverages', name: 'Drinks', emoji: '🥤' }
   ];
-
-  // Check online status
-  useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    setIsOnline(navigator.onLine);
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
 
   const parseCSVData = (csvText: string) => {
     try {
@@ -146,7 +127,6 @@ export default function DigitalMenu() {
         let current = '';
         let inQuotes = false;
         
-        // Handle CSV parsing with proper quote handling
         for (let i = 0; i < line.length; i++) {
           const char = line[i];
           if (char === '"') {
@@ -158,7 +138,7 @@ export default function DigitalMenu() {
             current += char;
           }
         }
-        values.push(current.trim()); // Add the last value
+        values.push(current.trim());
         
         const item: Partial<MenuItem> = { id: index + 1 };
         
@@ -205,68 +185,38 @@ export default function DigitalMenu() {
     }
   };
 
-  const fetchMenuData = useCallback(async (showLoading = true) => {
-    if (showLoading) setLoading(true);
-    setError(null);
+  const fetchMenuData = useCallback(async () => {
+    setLoading(true);
     
     try {
-      // Try to fetch from Google Sheets if online
-      if (isOnline) {
-        console.log('Fetching from Google Sheets...');
-        const response = await fetch(GOOGLE_SHEETS_URL, {
-          cache: 'no-cache',
-          headers: {
-            'Cache-Control': 'no-cache'
-          }
-        });
-        
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: Failed to fetch menu data`);
-        }
-        
-        const csvData = await response.text();
-        const parsedItems = parseCSVData(csvData);
-        
-        if (parsedItems.length === 0) {
-          throw new Error('No menu items found in spreadsheet');
-        }
-        
-        setMenuItems(parsedItems);
-        setUsingFallback(false);
-        console.log(`Loaded ${parsedItems.length} items from Google Sheets`);
-      } else {
-        // Use sample data when offline
-        console.log('Using sample data (offline)...');
-        await new Promise(resolve => setTimeout(resolve, 500)); // Simulate loading
-        setMenuItems(sampleMenuItems);
-        setUsingFallback(true);
+      const response = await fetch(GOOGLE_SHEETS_URL, {
+        cache: 'no-cache',
+        headers: { 'Cache-Control': 'no-cache' }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch menu data');
       }
       
-      setLastUpdated(new Date());
+      const csvData = await response.text();
+      const parsedItems = parseCSVData(csvData);
+      
+      if (parsedItems.length === 0) {
+        throw new Error('No menu items found');
+      }
+      
+      setMenuItems(parsedItems);
     } catch (err) {
       console.error('Error fetching menu:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load menu. Please try again.');
-      // Fallback to sample data on error
-      if (menuItems.length === 0) {
-        setMenuItems(sampleMenuItems);
-        setUsingFallback(true);
-      }
+      setMenuItems(sampleMenuItems);
     } finally {
       setLoading(false);
     }
-  }, [isOnline, menuItems.length]);
+  }, []);
 
   useEffect(() => {
     fetchMenuData();
-    // Auto-refresh every 5 minutes if online
-    const interval = setInterval(() => {
-      if (isOnline) {
-        fetchMenuData(false); // Silent refresh
-      }
-    }, 5 * 60 * 1000);
-    
-    return () => clearInterval(interval);
-  }, [fetchMenuData, isOnline]);
+  }, [fetchMenuData]);
 
   const filteredItems = menuItems.filter(item => {
     const matchesSearch = item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -285,231 +235,230 @@ export default function DigitalMenu() {
     setFavorites(newFavorites);
   };
 
-  const AllergenBadge = ({ allergen }: { allergen: string }) => (
-    <span className="inline-flex items-center px-3 py-2 rounded-full text-sm bg-red-100 text-red-800 font-medium">
-      <AlertCircle className="w-4 h-4 mr-1" />
-      {allergen}
-    </span>
-  );
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
-          <RefreshCw className="w-12 h-12 animate-spin mx-auto mb-6 text-blue-600" />
-          <h2 className="text-2xl font-semibold text-gray-900 mb-2">Loading Menu</h2>
-          <p className="text-gray-600 text-lg">Getting fresh items for you...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error && menuItems.length === 0) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-        <div className="text-center">
-          <div className="text-red-500 text-8xl mb-6">⚠️</div>
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">Menu Unavailable</h3>
-          <p className="text-gray-600 mb-6 text-lg max-w-sm mx-auto leading-relaxed">{error}</p>
-          <button 
-            onClick={() => fetchMenuData()}
-            className="bg-blue-600 text-white px-8 py-4 rounded-xl hover:bg-blue-700 transition-colors text-lg font-medium"
-          >
-            Try Again
-          </button>
+          <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-white text-xl font-light">Loading Menu...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Minimal Sticky Header */}
-      <div className="bg-white shadow-sm sticky top-0 z-20">
-        <div className="px-4 py-3 flex items-center justify-between">
-          <h1 className="text-lg font-bold text-gray-900">Your Restaurant Name</h1>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setSearchExpanded(!searchExpanded)}
-              className={`p-2 rounded-full transition-colors ${
-                searchExpanded ? 'bg-blue-600 text-white' : 'text-gray-500 hover:bg-gray-100'
-              }`}
-            >
-              <Search className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => fetchMenuData()}
-              disabled={loading}
-              className="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-50"
-              title="Refresh menu"
-            >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            </button>
+    <div className="min-h-screen bg-black text-white">
+      {/* Header */}
+      <header className="sticky top-0 z-50 bg-black/90 backdrop-blur-md border-b border-gray-800">
+        <div className="px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold">Savora</h1>
+              <p className="text-gray-400 text-sm">Fine Dining Experience</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowSearch(!showSearch)}
+                className="p-3 rounded-full bg-gray-900/50 hover:bg-gray-800 transition-colors"
+              >
+                <Search className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className="p-3 rounded-full bg-gray-900/50 hover:bg-gray-800 transition-colors"
+              >
+                <Filter className="w-5 h-5" />
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* Expandable Search Bar */}
-      {searchExpanded && (
-        <div className="bg-white border-b sticky top-16 z-10 px-4 py-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input
-              type="text"
-              placeholder="Search menu items..."
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              autoFocus
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Category Filter */}
-      <div className="bg-white border-b px-4 py-3">
-        <div className="flex overflow-x-auto gap-2 scrollbar-hide">
-          {categories.map(category => (
-            <button
-              key={category.id}
-              onClick={() => {
-                setSelectedCategory(category.id);
-                setSearchExpanded(false); // Close search when selecting category
-              }}
-              className={`flex-shrink-0 px-3 py-2 rounded-full text-xs font-medium transition-colors min-w-max ${
-                selectedCategory === category.id
-                  ? 'bg-blue-600 text-white shadow-md'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              <span className="mr-1">{category.icon}</span>
-              {category.name}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Error Message (compact) */}
-      {error && menuItems.length > 0 && (
-        <div className="mx-4 mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800">
-          ⚠️ Using cached menu. {error}
-        </div>
-      )}
-
-      {/* Mobile Menu Items - Single Column */}
-      <div className="px-4 py-4">
-        <div className="space-y-4">
-          {filteredItems.map(item => (
-            <div key={item.id} className="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="relative">
-                <Image 
-                  src={item.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop'} 
-                  alt={item.name}
-                  width={400}
-                  height={240}
-                  className="w-full h-60 object-cover"
-                />
-                {item.popular && (
-                  <div className="absolute top-3 left-3 bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                    🔥 Popular
+      {/* Search Overlay */}
+      {showSearch && (
+        <div className="fixed inset-0 z-50 bg-black">
+          <div className="p-6">
+            <div className="flex items-center gap-4 mb-6">
+              <button
+                onClick={() => setShowSearch(false)}
+                className="p-2 rounded-full hover:bg-gray-900"
+              >
+                <X className="w-6 h-6" />
+              </button>
+              <input
+                type="text"
+                placeholder="Search dishes..."
+                className="flex-1 bg-transparent border-b border-gray-700 pb-3 text-xl placeholder-gray-500 focus:outline-none focus:border-orange-500"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                autoFocus
+              />
+            </div>
+            {searchTerm && (
+              <div className="space-y-4">
+                {filteredItems.slice(0, 5).map(item => (
+                  <div key={item.id} className="flex items-center gap-4 p-4 rounded-xl bg-gray-900/30">
+                    <Image
+                      src={item.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop'}
+                      alt={item.name}
+                      width={60}
+                      height={60}
+                      className="rounded-lg object-cover"
+                    />
+                    <div className="flex-1">
+                      <h3 className="font-medium">{item.name}</h3>
+                      <p className="text-orange-500 font-semibold">${item.price.toFixed(2)}</p>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-gray-500" />
                   </div>
-                )}
-                <button
-                  onClick={() => toggleFavorite(item.id)}
-                  className={`absolute top-3 right-3 p-3 rounded-full ${
-                    favorites.has(item.id) ? 'bg-red-500 text-white' : 'bg-white text-gray-400'
-                  } hover:scale-110 transition-transform shadow-md`}
-                >
-                  <Star className="w-5 h-5" fill={favorites.has(item.id) ? 'currentColor' : 'none'} />
-                </button>
+                ))}
               </div>
-              
-              <div className="p-5">
-                <div className="flex justify-between items-start mb-3">
-                  <h3 className="text-xl font-bold text-gray-900 leading-tight">{item.name}</h3>
-                  <div className="text-2xl font-bold text-blue-600 ml-3">${item.price?.toFixed(2)}</div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Filters Overlay */}
+      {showFilters && (
+        <div className="fixed inset-0 z-40 bg-black/80 backdrop-blur-sm">
+          <div className="absolute bottom-0 left-0 right-0 bg-gray-900 rounded-t-3xl p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold">Categories</h3>
+              <button
+                onClick={() => setShowFilters(false)}
+                className="p-2 rounded-full hover:bg-gray-800"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {categories.map(category => (
+                <button
+                  key={category.id}
+                  onClick={() => {
+                    setSelectedCategory(category.id);
+                    setShowFilters(false);
+                  }}
+                  className={`p-4 rounded-xl text-left transition-colors ${
+                    selectedCategory === category.id
+                      ? 'bg-orange-500 text-black'
+                      : 'bg-gray-800 hover:bg-gray-700'
+                  }`}
+                >
+                  <div className="text-2xl mb-1">{category.emoji}</div>
+                  <div className="font-medium">{category.name}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Current Category */}
+      <div className="px-6 py-4 border-b border-gray-800">
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">
+            {categories.find(c => c.id === selectedCategory)?.emoji}
+          </span>
+          <div>
+            <h2 className="text-xl font-bold">
+              {categories.find(c => c.id === selectedCategory)?.name}
+            </h2>
+            <p className="text-gray-400 text-sm">{filteredItems.length} items</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Menu Items */}
+      <div className="px-6 py-6 pb-20">
+        <div className="space-y-6">
+          {filteredItems.map(item => (
+            <div key={item.id} className="group">
+              <div className="relative overflow-hidden rounded-2xl bg-gray-900/30 backdrop-blur-sm">
+                <div className="relative h-48">
+                  <Image
+                    src={item.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop'}
+                    alt={item.name}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                  
+                  {/* Popular Badge */}
+                  {item.popular && (
+                    <div className="absolute top-4 left-4 bg-orange-500 text-black px-3 py-1 rounded-full text-sm font-bold">
+                      Popular
+                    </div>
+                  )}
+                  
+                  {/* Favorite Button */}
+                  <button
+                    onClick={() => toggleFavorite(item.id)}
+                    className="absolute top-4 right-4 p-3 rounded-full bg-black/30 backdrop-blur-sm hover:scale-110 transition-transform"
+                  >
+                    <Heart
+                      className={`w-5 h-5 ${
+                        favorites.has(item.id) ? 'fill-red-500 text-red-500' : 'text-white'
+                      }`}
+                    />
+                  </button>
+                  
+                  {/* Price */}
+                  <div className="absolute bottom-4 right-4 bg-orange-500 text-black px-4 py-2 rounded-full">
+                    <span className="font-bold text-lg">${item.price.toFixed(2)}</span>
+                  </div>
                 </div>
                 
-                <p className="text-gray-600 mb-4 text-base leading-relaxed">{item.description}</p>
-                
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center text-sm text-gray-500">
-                    <Clock className="w-4 h-4 mr-2" />
-                    <span className="font-medium">{item.preptime || 'Ask server'}</span>
+                <div className="p-6">
+                  <div className="flex items-start justify-between mb-3">
+                    <h3 className="text-xl font-bold leading-tight flex-1">{item.name}</h3>
                   </div>
-                  {item.isvegetarian && (
-                    <div className="flex items-center text-sm text-green-600 bg-green-50 px-3 py-1 rounded-full">
-                      <Leaf className="w-4 h-4 mr-1" />
-                      <span className="font-medium">Vegetarian</span>
+                  
+                  <p className="text-gray-300 mb-4 leading-relaxed">{item.description}</p>
+                  
+                  <div className="flex items-center gap-4 text-sm text-gray-400">
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-4 h-4" />
+                      <span>{item.preptime}</span>
+                    </div>
+                    
+                    {item.isvegetarian && (
+                      <div className="flex items-center gap-1 text-green-400">
+                        <Leaf className="w-4 h-4" />
+                        <span>Vegetarian</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {item.allergens && item.allergens.length > 0 && (
+                    <div className="mt-4 pt-4 border-t border-gray-800">
+                      <p className="text-xs text-gray-500 mb-2">Contains:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {item.allergens.map(allergen => (
+                          <span
+                            key={allergen}
+                            className="text-xs bg-red-900/30 text-red-300 px-2 py-1 rounded-full"
+                          >
+                            {allergen}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
-                
-                {item.allergens && item.allergens.length > 0 && (
-                  <div className="border-t pt-4">
-                    <p className="text-sm text-gray-500 mb-2 font-medium">Contains allergens:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {item.allergens.map(allergen => (
-                        <AllergenBadge key={allergen} allergen={allergen} />
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           ))}
         </div>
 
         {filteredItems.length === 0 && (
-          <div className="text-center py-16">
-            <div className="text-gray-400 text-8xl mb-4">🔍</div>
-            <h3 className="text-2xl font-semibold text-gray-900 mb-3">No items found</h3>
-            <p className="text-gray-600 text-lg">Try adjusting your search or filter</p>
+          <div className="text-center py-20">
+            <div className="text-6xl mb-4">🍽️</div>
+            <h3 className="text-xl font-bold mb-2">No dishes found</h3>
+            <p className="text-gray-400">Try a different search or category</p>
           </div>
         )}
       </div>
-
-      {/* Mobile Footer with Status Info */}
-      <footer className="bg-gray-900 text-white py-6 mt-8">
-        <div className="px-4">
-          {/* Status Bar */}
-          <div className="flex items-center justify-center gap-4 mb-4 text-sm border-b border-gray-700 pb-4">
-            <span className="text-gray-300">Fresh • Local • Delicious</span>
-            <div className="flex items-center gap-1">
-              {isOnline ? (
-                <Wifi className="w-4 h-4 text-green-400" />
-              ) : (
-                <WifiOff className="w-4 h-4 text-red-400" />
-              )}
-              <span className="text-gray-300">{isOnline ? 'Online' : 'Offline'}</span>
-            </div>
-            {usingFallback && (
-              <span className="bg-yellow-600 text-yellow-100 px-2 py-1 rounded text-xs">Demo Mode</span>
-            )}
-          </div>
-
-          {/* Menu Stats */}
-          <div className="text-center mb-4 text-sm text-gray-300">
-            <p>{filteredItems.length} menu items available</p>
-            {lastUpdated && (
-              <p className="text-gray-400 text-xs mt-1">
-                Last updated: {lastUpdated.toLocaleTimeString()}
-              </p>
-            )}
-          </div>
-
-          {/* Restaurant Info */}
-          <div className="text-center">
-            <h3 className="text-xl font-semibold mb-3">Your Restaurant Name</h3>
-            <p className="text-gray-400 mb-4 text-lg">123 Main Street • (555) 123-4567</p>
-            <div className="text-sm text-gray-500 leading-relaxed">
-              <p className="mb-1">Mon-Thu: 11am-10pm</p>
-              <p className="mb-1">Fri-Sat: 11am-11pm</p>
-              <p>Sunday: 12pm-9pm</p>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

@@ -1,0 +1,99 @@
+{
+  "name": "Savora - Fine Dining Experience",
+  "short_name": "Savora Menu",
+  "description": "Discover our exquisite menu featuring fresh, locally sourced ingredients and culinary artistry",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#FF6B35",
+  "orientation": "portrait-primary",
+  "categories": ["food", "restaurant", "dining"],
+  "lang": "en",
+  "dir": "ltr",
+  "scope": "/",
+  "id": "savora-menu-app",
+  
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  
+  "screenshots": [
+    {
+      "src": "/screenshot-mobile.png",
+      "sizes": "375x812",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "/screenshot-tablet.png",
+      "sizes": "768x1024",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
+  
+  "shortcuts": [
+    {
+      "name": "View Menu",
+      "short_name": "Menu",
+      "description": "Browse our full menu",
+      "url": "/",
+      "icons": [
+        {
+          "src": "/shortcut-menu.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Search Dishes",
+      "short_name": "Search",
+      "description": "Find your favorite dishes",
+      "url": "/?search=true",
+      "icons": [
+        {
+          "src": "/shortcut-search.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  
+  "related_applications": [],
+  "prefer_related_applications": false,
+  
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  }
+}
