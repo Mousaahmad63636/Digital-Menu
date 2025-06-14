@@ -125,26 +125,6 @@ export default function RootLayout({
         <div className="min-h-screen safe-area-top safe-area-bottom">
           {children}
         </div>
-        
-        {/* Prevent context menu on long press (mobile) */}
-        <style jsx>{`
-          * {
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -khtml-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-          }
-          
-          input, textarea {
-            -webkit-user-select: text;
-            -khtml-user-select: text;
-            -moz-user-select: text;
-            -ms-user-select: text;
-            user-select: text;
-          }
-        `}</style>
       </body>
     </html>
   );
