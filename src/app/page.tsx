@@ -62,7 +62,7 @@ export default function DigitalMenu() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [categories, setCategories] = useState<{id: string, name: string}[]>([]);
   const [loading, setLoading] = useState(true);
-  const [notification, setNotification] = useState<string | null>(null);
+
 
   // Google Sheets CSV Export URL
   const GOOGLE_SHEETS_URL = "https://docs.google.com/spreadsheets/d/1SJ0ooxxlc74FsvBlSoStuDus0nh4MEDeLpvtYQAf6Iw/export?format=csv&gid=0";
@@ -305,11 +305,6 @@ const generateCategoriesFromItems = (items: MenuItem[]) => {
           </div>
         </div>
       </footer>
-      {notification && (
-        <div className="notification">
-          {notification}
-        </div>
-      )}
     </div>
   );
 }
