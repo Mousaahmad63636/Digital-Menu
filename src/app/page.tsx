@@ -279,12 +279,12 @@ const generateCategoriesFromItems = (items: MenuItem[]) => {
     } finally {
       setLoading(false);
     }
-  }, []); // No dependencies - only runs once
+  }, [GOOGLE_SHEETS_URL]);
 
   // Only fetch data once when component mounts
   useEffect(() => {
     fetchMenuData();
-  }, []); // Empty dependency array - only runs once
+  }, [fetchMenuData]);
 
   // Instant filtering - no loading involved
   const filteredItems = menuItems.filter(item => {
