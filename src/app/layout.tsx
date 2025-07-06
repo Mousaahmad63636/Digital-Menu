@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { defaultRestaurantConfig } from "../config/restaurant";
 
 export const metadata: Metadata = {
-  title: "Sunshine Resort - Digital Menu",
-  description: "Culinary Excellence by the Sea - Browse our fresh menu items on your mobile device",
-  keywords: ["restaurant", "resort", "menu", "food", "tropical", "mobile menu", "dining"],
-  authors: [{ name: "Sunshine Resort" }],
-  creator: "Sunshine Resort",
-  publisher: "Sunshine Resort",
+  title: `${defaultRestaurantConfig.name} - Digital Menu`,
+  description: `${defaultRestaurantConfig.description} - Browse our fresh menu items on your mobile device`,
+  keywords: defaultRestaurantConfig.keywords,
+  authors: [{ name: defaultRestaurantConfig.name }],
+  creator: defaultRestaurantConfig.name,
+  publisher: defaultRestaurantConfig.name,
   
   // Mobile optimization
   themeColor: "#FF7675",
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Sunshine Resort Menu",
+    title: `${defaultRestaurantConfig.name} Menu`,
   },
   
   // Mobile app manifest
@@ -27,16 +28,16 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://sunshine-resort.com",
-    siteName: "Sunshine Resort",
-    title: "Sunshine Resort - Digital Menu",
-    description: "Culinary Excellence by the Sea - Browse our fresh menu items",
+    url: `https://${defaultRestaurantConfig.website}`,
+    siteName: defaultRestaurantConfig.name,
+    title: `${defaultRestaurantConfig.name} - Digital Menu`,
+    description: `${defaultRestaurantConfig.description} - Browse our fresh menu items`,
     images: [
       {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "Sunshine Resort Menu",
+        alt: `${defaultRestaurantConfig.name} Menu`,
       },
     ],
   },
@@ -44,8 +45,8 @@ export const metadata: Metadata = {
   // Twitter Card
   twitter: {
     card: "summary_large_image",
-    title: "Sunshine Resort - Digital Menu",
-    description: "Culinary Excellence by the Sea - Browse our fresh menu items",
+    title: `${defaultRestaurantConfig.name} - Digital Menu`,
+    description: `${defaultRestaurantConfig.description} - Browse our fresh menu items`,
     images: ["/og-image.jpg"],
   },
   
@@ -71,10 +72,10 @@ export const metadata: Metadata = {
     "mobile-web-app-capable": "yes",
     "apple-mobile-web-app-capable": "yes",
     "apple-mobile-web-app-status-bar-style": "default",
-    "msapplication-TileColor": "#FF7675",
-    "msapplication-navbutton-color": "#FF7675",
-    "application-name": "Sunshine Resort Menu",
-    "msapplication-tooltip": "Sunshine Resort Digital Menu",
+    "msapplication-TileColor": defaultRestaurantConfig.primaryColor,
+    "msapplication-navbutton-color": defaultRestaurantConfig.primaryColor,
+    "application-name": `${defaultRestaurantConfig.name} Menu`,
+    "msapplication-tooltip": `${defaultRestaurantConfig.name} Digital Menu`,
     "msapplication-starturl": "/",
     "msapplication-tap-highlight": "no",
   },

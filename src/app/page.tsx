@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
+import { defaultRestaurantConfig } from '../config/restaurant';
 
 interface MenuItem {
   id: number;
@@ -16,7 +17,31 @@ interface MenuItem {
   popular: boolean;
 }
 
+interface RestaurantData {
+  name: string;
+  tagline: string;
+  address: string;
+  phone: string;
+  website: string;
+  facebook: string;
+  instagram: string;
+  twitter: string;
+  primaryColor: string;
+}
+
 // Sample data for demo/fallback
+const sampleRestaurantData: RestaurantData = {
+  name: "Sunshine Resort",
+  tagline: "Culinary Excellence by the Sea",
+  address: "123 Paradise Beach Drive, Tropical Island",
+  phone: "+1 (555) SUNSHINE",
+  website: "sunshineresort.com",
+  facebook: "https://facebook.com/sunshineresort",
+  instagram: "https://instagram.com/sunshineresort",
+  twitter: "https://twitter.com/sunshineresort",
+  primaryColor: "#FF7675"
+};
+
 const sampleMenuItems: MenuItem[] = [
   {
     id: 1,
@@ -61,80 +86,151 @@ export default function DigitalMenu() {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [categories, setCategories] = useState<{id: string, name: string}[]>([]);
+  const [restaurantData, setRestaurantData] = useState<RestaurantData>(sampleRestaurantData);
   const [loading, setLoading] = useState(true);
 
 
   // Google Sheets CSV Export URL
-  const GOOGLE_SHEETS_URL = "https://docs.google.com/spreadsheets/d/1SJ0ooxxlc74FsvBlSoStuDus0nh4MEDeLpvtYQAf6Iw/export?format=csv&gid=0";
+  const GOOGLE_SHEETS_URL = defaultRestaurantConfig.googleSheetsUrl;
 
   const parseCSVData = (csvText: string) => {
     try {
       const lines = csvText.trim().split("\n");
       if (lines.length < 2) throw new Error("Invalid CSV format");
       
-      const headers = lines[0].split(",").map(h => h.replace(/"/g, "").trim().toLowerCase());
+      let restaurantDetails: RestaurantData = { ...sampleRestaurantData };
+      let menuItems: MenuItem[] = [];
       
-      const items = lines.slice(1).map((line, index) => {
-        const values: string[] = [];
-        let current = "";
-        let inQuotes = false;
+      // Check if this is the new format with RESTAURANT_DETAILS section
+      const hasRestaurantDetails = lines.some(line => line.includes("RESTAURANT_DETAILS"));
+      const menuStartIndex = lines.findIndex(line => line.includes("MENU_ITEMS"));
+      
+      if (hasRestaurantDetails && menuStartIndex !== -1) {
+        // NEW FORMAT: Parse restaurant details + menu items
         
-        for (let i = 0; i < line.length; i++) {
-          const char = line[i];
-          if (char === "\"") {
-            inQuotes = !inQuotes;
-          } else if (char === "," && !inQuotes) {
-            values.push(current.trim());
-            current = "";
-          } else {
-            current += char;
+        // Parse restaurant details (before menu items)
+        for (let i = 0; i < menuStartIndex; i++) {
+          const line = lines[i];
+          if (line.includes(",") && !line.includes("RESTAURANT_DETAILS")) {
+            const [key, ...valueParts] = line.split(",");
+            const value = valueParts.join(",").replace(/"/g, "").trim();
+            const cleanKey = key.replace(/"/g, "").trim();
+            
+            switch (cleanKey) {
+              case "name":
+                restaurantDetails.name = value;
+                break;
+              case "tagline":
+                restaurantDetails.tagline = value;
+                break;
+              case "address":
+                restaurantDetails.address = value;
+                break;
+              case "phone":
+                restaurantDetails.phone = value;
+                break;
+              case "website":
+                restaurantDetails.website = value;
+                break;
+              case "facebook":
+                restaurantDetails.facebook = value;
+                break;
+              case "instagram":
+                restaurantDetails.instagram = value;
+                break;
+              case "twitter":
+                restaurantDetails.twitter = value;
+                break;
+              case "primaryColor":
+                restaurantDetails.primaryColor = value;
+                break;
+            }
           }
         }
-        values.push(current.trim());
         
-        const item: Partial<MenuItem> = { id: index + 1 };
+        // Parse menu items starting after MENU_ITEMS header
+        const menuHeaderIndex = menuStartIndex + 1;
+        if (menuHeaderIndex >= lines.length) {
+          throw new Error("Menu headers not found");
+        }
         
-        headers.forEach((header, i) => {
-          const value = (values[i] || "").replace(/"/g, "").trim();
-          switch (header) {
-            case "name":
-              item.name = value;
-              break;
-            case "description":
-              item.description = value;
-              break;
-            case "price":
-              item.price = parseFloat(value) || 0;
-              break;
-            case "category":
-              item.category = value.toLowerCase();
-              break;
-            case "image":
-              item.image = value;
-              break;
-            case "allergens":
-              item.allergens = value ? value.split(";").map(a => a.trim()).filter(a => a) : [];
-              break;
-            case "isvegetarian":
-              item.isvegetarian = value.toLowerCase() === "yes" || value.toLowerCase() === "true";
-              break;
-            case "preptime":
-              item.preptime = value;
-              break;
-            case "popular":
-              item.popular = value.toLowerCase() === "yes" || value.toLowerCase() === "true";
-              break;
-          }
-        });
+        const headers = lines[menuHeaderIndex].split(",").map(h => h.replace(/"/g, "").trim().toLowerCase());
+        menuItems = lines.slice(menuHeaderIndex + 1).map((line, index) => {
+          return parseMenuItemFromLine(line, headers, index);
+        }).filter(item => item.name && item.name.length > 0 && item.category);
         
-        return item as MenuItem;
-      }).filter(item => item.name && item.name.length > 0 && item.category);
+      } else {
+        // OLD FORMAT: Just menu items (backward compatibility)
+        console.log("Using legacy format - menu items only");
+        
+        const headers = lines[0].split(",").map(h => h.replace(/"/g, "").trim().toLowerCase());
+        menuItems = lines.slice(1).map((line, index) => {
+          return parseMenuItemFromLine(line, headers, index);
+        }).filter(item => item.name && item.name.length > 0 && item.category);
+      }
       
-      return items;
+      return { restaurantDetails, menuItems };
     } catch (error) {
       console.error("CSV parsing error:", error);
-      throw new Error("Failed to parse menu data");
+      throw new Error("Failed to parse data");
     }
+  };
+  
+  // Helper function to parse a menu item line
+  const parseMenuItemFromLine = (line: string, headers: string[], index: number): MenuItem => {
+    const values: string[] = [];
+    let current = "";
+    let inQuotes = false;
+    
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      if (char === "\"") {
+        inQuotes = !inQuotes;
+      } else if (char === "," && !inQuotes) {
+        values.push(current.trim());
+        current = "";
+      } else {
+        current += char;
+      }
+    }
+    values.push(current.trim());
+    
+    const item: Partial<MenuItem> = { id: index + 1 };
+    
+    headers.forEach((header, i) => {
+      const value = (values[i] || "").replace(/"/g, "").trim();
+      switch (header) {
+        case "name":
+          item.name = value;
+          break;
+        case "description":
+          item.description = value;
+          break;
+        case "price":
+          item.price = parseFloat(value) || 0;
+          break;
+        case "category":
+          item.category = value.toLowerCase();
+          break;
+        case "image":
+          item.image = value;
+          break;
+        case "allergens":
+          item.allergens = value ? value.split(";").map(a => a.trim()).filter(a => a) : [];
+          break;
+        case "isvegetarian":
+          item.isvegetarian = value.toLowerCase() === "yes" || value.toLowerCase() === "true";
+          break;
+        case "preptime":
+          item.preptime = value;
+          break;
+        case "popular":
+          item.popular = value.toLowerCase() === "yes" || value.toLowerCase() === "true";
+          break;
+      }
+    });
+    
+    return item as MenuItem;
   };
 
 const generateCategoriesFromItems = (items: MenuItem[]) => {
@@ -162,20 +258,22 @@ const generateCategoriesFromItems = (items: MenuItem[]) => {
       });
       
       if (!response.ok) {
-        throw new Error("Failed to fetch menu data");
+        throw new Error("Failed to fetch data");
       }
       
       const csvData = await response.text();
-      const parsedItems = parseCSVData(csvData);
+      const { restaurantDetails, menuItems } = parseCSVData(csvData);
       
-      if (parsedItems.length === 0) {
+      if (menuItems.length === 0) {
         throw new Error("No menu items found");
       }
       
-      setMenuItems(parsedItems);
-      generateCategoriesFromItems(parsedItems);
+      setRestaurantData(restaurantDetails);
+      setMenuItems(menuItems);
+      generateCategoriesFromItems(menuItems);
     } catch (err) {
-      console.error("Error fetching menu:", err);
+      console.error("Error fetching data:", err);
+      setRestaurantData(sampleRestaurantData);
       setMenuItems(sampleMenuItems);
       generateCategoriesFromItems(sampleMenuItems);
     } finally {
@@ -221,8 +319,9 @@ const generateCategoriesFromItems = (items: MenuItem[]) => {
 
   return (
     <div className="container">
-      <header className="header">
-        <div className="logo">Sunshine Resort</div>
+      <header className="header" style={{ background: `linear-gradient(135deg, ${restaurantData.primaryColor}, ${restaurantData.primaryColor}dd)` }}>
+        <div className="logo">{restaurantData.name}</div>
+        {restaurantData.tagline && <div className="tagline">{restaurantData.tagline}</div>}
       </header>
       <div className="search-bar">
         <input
@@ -295,13 +394,19 @@ const generateCategoriesFromItems = (items: MenuItem[]) => {
       <footer className="footer">
         <div className="footer-content">
           <div className="contact-info">
-            📍 123 Paradise Beach Drive, Tropical Island<br />
-            📞 +1 (555) SUNSHINE | 🌐 sunshineresort.com
+            📍 {restaurantData.address}<br />
+            📞 {restaurantData.phone} | 🌐 {restaurantData.website}
           </div>
           <div className="social-links">
-            <a href="#" className="social-link">📘</a>
-            <a href="#" className="social-link">📷</a>
-            <a href="#" className="social-link">🐦</a>
+            {restaurantData.facebook && (
+              <a href={restaurantData.facebook} target="_blank" rel="noopener noreferrer" className="social-link">📘</a>
+            )}
+            {restaurantData.instagram && (
+              <a href={restaurantData.instagram} target="_blank" rel="noopener noreferrer" className="social-link">📷</a>
+            )}
+            {restaurantData.twitter && (
+              <a href={restaurantData.twitter} target="_blank" rel="noopener noreferrer" className="social-link">🐦</a>
+            )}
           </div>
         </div>
       </footer>
